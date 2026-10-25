@@ -73,7 +73,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-bold text-xl tracking-tight text-white">Elastic<span class="text-cyan-400">Lab</span></span>
-                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/50 font-mono">v2.6</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/50 font-mono">v2.7</span>
                         </div>
                         <p class="text-xs text-slate-400 hidden sm:block">Laboratorio Interactivo de Elasticidad y Ley de Hooke</p>
                     </div>
@@ -110,9 +110,7 @@
     <!-- CONTENIDO PRINCIPAL -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        <!-- ========================================== -->
         <!-- TAB 1: SIMULADOR 2D Y CURVA TENSIÓN-DEFORMACIÓN -->
-        <!-- ========================================== -->
         <section id="sec-simulador" class="tab-content space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
@@ -265,9 +263,7 @@
             </div>
         </section>
 
-        <!-- ========================================== -->
         <!-- TAB 2: CALCULADORA RÁPIDA DE ELASTICIDAD -->
-        <!-- ========================================== -->
         <section id="sec-calculadora" class="tab-content hidden space-y-6">
             <div class="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
                 <div class="border-b border-slate-800 pb-4">
@@ -338,9 +334,7 @@
             </div>
         </section>
 
-        <!-- ========================================== -->
         <!-- TAB 3: GENERADOR DE PROBLEMAS PRÁCTICOS -->
-        <!-- ========================================== -->
         <section id="sec-problemas" class="tab-content hidden space-y-6">
             <div class="max-w-4xl mx-auto space-y-6">
                 
@@ -426,9 +420,7 @@
             </div>
         </section>
 
-        <!-- ========================================== -->
         <!-- TAB 4: TEST TEÓRICO INTERACTIVO -->
-        <!-- ========================================== -->
         <section id="sec-quiz" class="tab-content hidden space-y-6">
             <div class="max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-4">
@@ -452,9 +444,7 @@
             </div>
         </section>
 
-        <!-- ========================================== -->
         <!-- TAB 5: CONVERSOR MULTIDIRECCIONAL DE UNIDADES -->
-        <!-- ========================================== -->
         <section id="sec-conversor" class="tab-content hidden space-y-6">
             <div class="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
                 <div class="border-b border-slate-800 pb-4">
@@ -665,6 +655,14 @@
             }, 300);
         });
 
+        // Oyente para reescalado de ventana
+        window.addEventListener('resize', () => {
+            const simSec = document.getElementById('sec-simulador');
+            if (simSec && !simSec.classList.contains('hidden')) {
+                updateSimulation();
+            }
+        });
+
         // Auxiliar para KaTeX
         function renderMathIn(element) {
             if (window.renderMathInElement && element) {
@@ -707,7 +705,18 @@
             
             const L0 = parseFloat(document.getElementById('input-L0').value);
             const d = parseFloat(document.getElementById('input-d').value);
-            const F_kN = parseFloat(document.getElementById('input-F').value);
+            
+            // Sección circular
+            const A_mm2 = (Math.PI * Math.pow(d, 2)) / 4;
+            const A_m2 = A_mm2 * 1e-6;
+
+            // Recalcular dinámicamente el límite máximo del slider de carga
+            const dynamicMaxF = Math.ceil((mat.ultimate * A_mm2) / 1000 * 1.15);
+            const sliderF = document.getElementById('input-F');
+            sliderF.max = Math.max(120, dynamicMaxF);
+
+            const F_kN = parseFloat(sliderF.value);
+            const F_N = F_kN * 1000;
 
             // Actualizar etiquetas UI
             document.getElementById('val-L0').innerText = `${L0.toFixed(1)} m`;
@@ -715,12 +724,7 @@
             document.getElementById('val-F').innerText = `${F_kN.toFixed(1)} kN`;
             document.getElementById('mat-prop-badge').innerText = `E = ${mat.E} GPa | σ_y = ${mat.yield} MPa`;
 
-            // Sección circular
-            const A_mm2 = (Math.PI * Math.pow(d, 2)) / 4;
-            const A_m2 = A_mm2 * 1e-6;
-            const F_N = F_kN * 1000;
             const sigma_MPa = F_N / A_mm2; // 1 N/mm² = 1 MPa
-            
             const E_MPa = mat.E * 1000;
             let strain = sigma_MPa / E_MPa;
             let isYielded = sigma_MPa >= mat.yield;
@@ -766,7 +770,7 @@
             }
 
             updateStatusCard(isYielded, isFractured, sigma_MPa, mat);
-            drawSpecimenCanvas(strain, isYielded, isFractured, sigma_MPa / mat.yield);
+            drawSpecimenCanvas(strain, isYielded, isFractured, sigma_MPa / mat.yield, mat);
             drawCurveCanvas(mat, strain, sigma_MPa, isFractured);
         }
 
@@ -794,7 +798,7 @@
             }
         }
 
-        function drawSpecimenCanvas(strain, isYielded, isFractured, stressRatio) {
+        function drawSpecimenCanvas(strain, isYielded, isFractured, stressRatio, mat) {
             const canvas = document.getElementById('specimenCanvas');
             const ctx = canvas.getContext('2d');
             
@@ -823,7 +827,17 @@
 
             const startX = 10 + gripW;
             const endX_base = w - gripW - 10;
-            const visualStretch = Math.min(strain * 180, 70);
+
+            // Escala visual de deformación adaptativa (amplifica la fase elástica)
+            const yieldStrain = mat ? (mat.yield / (mat.E * 1000)) : 0.001;
+            let visualStrain = strain;
+            if (!isYielded) {
+                visualStrain = (strain / yieldStrain) * 0.04; // Deformación elástica escalada hasta el 4% visual
+            } else {
+                visualStrain = 0.04 + (strain - yieldStrain);
+            }
+
+            const visualStretch = Math.min(visualStrain * 180, 70);
             const currentEndX = endX_base + (isFractured ? visualStretch * 0.5 : visualStretch);
             const totalLen = currentEndX - startX;
 
@@ -970,14 +984,15 @@
                 slider.value = 0;
 
                 autoPullInterval = setInterval(() => {
-                    let val = parseFloat(slider.value) + 0.8;
-                    slider.value = val;
-                    updateSimulation();
-
                     const mat = MATERIALS[document.getElementById('sim-material').value];
                     const d = parseFloat(document.getElementById('input-d').value);
                     const A = (Math.PI * d * d)/4;
                     const maxF = (mat.ultimate * A)/1000;
+                    
+                    const step = Math.max(0.8, maxF / 150);
+                    let val = parseFloat(slider.value) + step;
+                    slider.value = val;
+                    updateSimulation();
 
                     if (val >= maxF || val >= parseFloat(slider.max)) {
                         toggleAutoPull();
