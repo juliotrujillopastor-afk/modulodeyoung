@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElasticLab - Elasticidad y Módulo de Young</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                            950: '#082f49',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- KaTeX CSS & JS para renderizado perfecto de matemáticas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        /* Estilos personalizados para controles y animaciones */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+        }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #38bdf8;
+            color: #38bdf8;
+            background-color: rgba(56, 189, 248, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-white">
+
+    <!-- BARRA NAVEGACIÓN PRINCIPAL -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo y Título -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                        <i class="fa-solid fa-arrows-left-right-to-line text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-xl tracking-tight text-white">Elastic<span class="text-cyan-400">Lab</span></span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/50 font-mono">v2.5</span>
+                        </div>
+                        <p class="text-xs text-slate-400 hidden sm:block">Laboratorio Interactivo de Elasticidad y Ley de Hooke</p>
+                    </div>
+                </div>
+
+                <!-- Nivel Académico -->
+                <div class="hidden md:flex items-center gap-2 bg-slate-800/60 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                    <i class="fa-solid fa-graduation-cap text-cyan-400"></i>
+                    <span class="text-xs font-medium text-slate-300">1º Bachillerato · Tecnología e Ingeniería</span>
+                </div>
+            </div>
+
+            <!-- Pestañas de Navegación -->
+            <nav class="flex space-x-1 sm:space-x-4 border-t border-slate-800/80 pt-1 overflow-x-auto no-scrollbar" id="nav-tabs">
+                <button onclick="switchTab('simulador')" id="tab-btn-simulador" class="tab-btn active px-3 py-2 text-sm font-medium text-slate-300 hover:text-white rounded-t-lg transition flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-flask"></i> Simulador & Gráfica
+                </button>
+                <button onclick="switchTab('calculadora')" id="tab-btn-calculadora" class="tab-btn px-3 py-2 text-sm font-medium text-slate-400 hover:text-white rounded-t-lg transition flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-calculator"></i> Calculadora
+                </button>
+                <button onclick="switchTab('problemas')" id="tab-btn-problemas" class="tab-btn px-3 py-2 text-sm font-medium text-slate-400 hover:text-white rounded-t-lg transition flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-pen-ruler"></i> Ejercicios Prácticos
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-btn-quiz" class="tab-btn px-3 py-2 text-sm font-medium text-slate-400 hover:text-white rounded-t-lg transition flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-circle-question"></i> Test Teórico
+                </button>
+                <button onclick="switchTab('conversor')" id="tab-btn-conversor" class="tab-btn px-3 py-2 text-sm font-medium text-slate-400 hover:text-white rounded-t-lg transition flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-right-left"></i> Conversor Unidades
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: SIMULADOR 2D Y CURVA TENSIÓN-DEFORMACIÓN -->
+        <!-- ========================================== -->
+        <section id="sec-simulador" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Panel de Controles (Izquierda) -->
+                <div class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-5 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-cyan-400"></i> Parámetros del Ensayo
+                        </h2>
+                        <button onclick="resetSimulation()" class="text-xs text-slate-400 hover:text-cyan-400 transition flex items-center gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> Reiniciar
+                        </button>
+                    </div>
+
+                    <!-- Selección de Material -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-medium text-slate-300 flex items-center justify-between">
+                            <span>Material de la Probeta</span>
+                            <span id="mat-prop-badge" class="text-[10px] text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">E = 210 GPa</span>
+                        </label>
+                        <select id="sim-material" onchange="updateSimulation()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
+                            <option value="acero">Acero Estructural (E = 210 GPa, σ_y = 250 MPa)</option>
+                            <option value="aluminio">Aluminio 6061-T6 (E = 70 GPa, σ_y = 240 MPa)</option>
+                            <option value="laton">Latón Industrial (E = 100 GPa, σ_y = 200 MPa)</option>
+                            <option value="cobre">Cobre Recocido (E = 120 GPa, σ_y = 70 MPa)</option>
+                            <option value="titanio">Titanio Grado 5 (E = 115 GPa, σ_y = 830 MPa)</option>
+                        </select>
+                    </div>
+
+                    <!-- Longitud Inicial L0 -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-medium text-slate-300">
+                            <span>Longitud Inicial ($L_0$)</span>
+                            <span id="val-L0" class="font-mono text-cyan-400">2.0 m</span>
+                        </div>
+                        <input type="range" id="input-L0" min="0.5" max="5.0" step="0.1" value="2.0" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <!-- Diámetro d -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-medium text-slate-300">
+                            <span>Diámetro ($d$)</span>
+                            <span id="val-d" class="font-mono text-cyan-400">16.0 mm</span>
+                        </div>
+                        <input type="range" id="input-d" min="5" max="30" step="0.5" value="16.0" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <!-- Carga Aplicada F -->
+                    <div class="space-y-1.5 pt-2 border-t border-slate-800">
+                        <div class="flex justify-between text-xs font-medium text-slate-300">
+                            <span class="text-amber-400 font-semibold">Carga de Tracción ($F$)</span>
+                            <span id="val-F" class="font-mono text-amber-400 font-bold">25.0 kN</span>
+                        </div>
+                        <input type="range" id="input-F" min="0" max="120" step="0.5" value="25.0" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <!-- Botón Animación Ensayo de Tracción -->
+                    <div class="pt-2">
+                        <button id="btn-auto-pull" onclick="toggleAutoPull()" class="w-full py-2.5 px-4 rounded-xl font-medium text-sm bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-600/20 transition flex items-center justify-center gap-2">
+                            <i id="icon-auto-pull" class="fa-solid fa-play"></i> <span id="text-auto-pull">Ejecutar Ensayo Progresivo</span>
+                        </button>
+                    </div>
+
+                    <!-- Estado del Material Badge -->
+                    <div id="material-status-card" class="p-3 rounded-xl bg-slate-950 border border-emerald-500/40 text-emerald-400 flex items-center gap-3">
+                        <i id="status-icon" class="fa-solid fa-shield-halved text-xl"></i>
+                        <div>
+                            <div id="status-title" class="text-xs font-bold uppercase tracking-wider">Zona Elástica (Ley de Hooke)</div>
+                            <div id="status-desc" class="text-[11px] text-slate-400">El material volverá a su forma original al retirar la fuerza.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualizador 2D & Gráfico (Derecha) -->
+                <div class="lg:col-span-8 space-y-6">
+                    
+                    <!-- Canvas Probeta 2D -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                        <div class="flex items-center justify-between mb-2 px-1">
+                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-eye text-cyan-400"></i> Simulación Visual de la Probeta (Ensayo de Tracción)
+                            </h3>
+                            <span id="necking-indicator" class="text-[11px] text-slate-400 font-mono">Estricción: 0%</span>
+                        </div>
+                        
+                        <div class="relative w-full h-44 bg-slate-950 rounded-xl overflow-hidden border border-slate-800/80 flex items-center justify-center">
+                            <canvas id="specimenCanvas" class="w-full h-full block"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gráfica Tensión vs Deformación (Canvas) -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                        <div class="flex items-center justify-between mb-2 px-1">
+                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-cyan-400"></i> Diagrama Tensión - Deformación Unitaria ($\sigma - \varepsilon$)
+                            </h3>
+                            <div class="flex items-center gap-3 text-[10px] text-slate-400">
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Elástica</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Fluencia</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Rotura</span>
+                            </div>
+                        </div>
+
+                        <div class="w-full h-64 bg-slate-950 rounded-xl border border-slate-800/80 relative">
+                            <canvas id="curveCanvas" class="w-full h-full block"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Panel de Métricas en Tiempo Real -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                    <span class="text-[11px] font-medium text-slate-400">Área Sección ($A$)</span>
+                    <div id="m-area" class="text-lg font-bold font-mono text-slate-100">201.1 <span class="text-xs text-slate-400 font-normal">mm²</span></div>
+                    <span id="m-area-m2" class="text-[10px] text-slate-500 font-mono block">2.01e-4 m²</span>
+                </div>
+
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                    <span class="text-[11px] font-medium text-slate-400">Tensión ($\sigma = \frac{F}{A}$)</span>
+                    <div id="m-stress" class="text-lg font-bold font-mono text-cyan-400">124.3 <span class="text-xs text-slate-400 font-normal">MPa</span></div>
+                    <span class="text-[10px] text-slate-500 block">N/mm²</span>
+                </div>
+
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                    <span class="text-[11px] font-medium text-slate-400">Deformación ($\varepsilon$)</span>
+                    <div id="m-strain" class="text-lg font-bold font-mono text-cyan-300">0.059 <span class="text-xs text-slate-400 font-normal">%</span></div>
+                    <span id="m-strain-raw" class="text-[10px] text-slate-500 font-mono block">0.00059</span>
+                </div>
+
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                    <span class="text-[11px] font-medium text-slate-400">Alargamiento ($\Delta L$)</span>
+                    <div id="m-dl" class="text-lg font-bold font-mono text-amber-400">1.18 <span class="text-xs text-slate-400 font-normal">mm</span></div>
+                    <span class="text-[10px] text-slate-500 block">F·L₀ / A·E</span>
+                </div>
+
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                    <span class="text-[11px] font-medium text-slate-400">Longitud Final ($L$)</span>
+                    <div id="m-lfinal" class="text-lg font-bold font-mono text-slate-100">2.0012 <span class="text-xs text-slate-400 font-normal">m</span></div>
+                    <span class="text-[10px] text-slate-500 block">L₀ + ΔL</span>
+                </div>
+
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
+                    <span class="text-[11px] font-medium text-slate-400">Coef. Seguridad ($n$)</span>
+                    <div id="m-safety" class="text-lg font-bold font-mono text-emerald-400">2.01</div>
+                    <span id="m-safety-label" class="text-[10px] text-emerald-500 block">Seguro (σ &lt; σ_y)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: CALCULADORA RÁPIDA DE ELASTICIDAD -->
+        <!-- ========================================== -->
+        <section id="sec-calculadora" class="tab-content hidden space-y-6">
+            <div class="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                <div class="border-b border-slate-800 pb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-cyan-400"></i> Calculadora Directa de la Ley de Hooke
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-1">Introduce las magnitudes conocidas para obtener de inmediato el alargamiento, tensión y sección.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Entradas -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Fuerza aplicada $F$ (kN)</label>
+                            <input type="number" id="calc-f" value="10" step="0.1" oninput="runCalculator()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-sm focus:border-cyan-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Módulo de Young $E$ (GPa)</label>
+                            <input type="number" id="calc-e" value="210" step="1" oninput="runCalculator()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-sm focus:border-cyan-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Longitud inicial $L_0$ (m)</label>
+                            <input type="number" id="calc-l" value="3.0" step="0.1" oninput="runCalculator()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-sm focus:border-cyan-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Diámetro de la sección $d$ (mm)</label>
+                            <input type="number" id="calc-d" value="12" step="0.5" oninput="runCalculator()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-sm focus:border-cyan-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Salida de Resultados y Pasos Explicativos -->
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 border-b border-slate-800 pb-2">Resultados Calculados</h3>
+                            
+                            <div class="space-y-3 font-mono">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-slate-400">Área $A$:</span>
+                                    <span id="calc-res-a" class="text-cyan-300 font-bold">113.10 mm²</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-slate-400">Tensión $\sigma$:</span>
+                                    <span id="calc-res-s" class="text-cyan-400 font-bold">88.42 MPa</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-slate-400">Deformación $\varepsilon$:</span>
+                                    <span id="calc-res-eps" class="text-slate-200">0.000421</span>
+                                </div>
+                                <div class="flex justify-between items-center text-base pt-2 border-t border-slate-800">
+                                    <span class="text-amber-400 font-bold">Alargamiento $\Delta L$:</span>
+                                    <span id="calc-res-dl" class="text-amber-400 font-bold text-lg">1.263 mm</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-xs text-slate-400 space-y-1">
+                            <span class="font-semibold text-slate-300 block">Fórmula Empleada:</span>
+                            <div class="text-center py-1 font-serif text-cyan-300 text-sm">
+                                $$\Delta L = \frac{F \cdot L_0}{A \cdot E}$$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: GENERADOR DE PROBLEMAS PRÁCTICOS (CORREGIDO) -->
+        <!-- ========================================== -->
+        <section id="sec-problemas" class="tab-content hidden space-y-6">
+            <div class="max-w-4xl mx-auto space-y-6">
+                
+                <!-- Encabezado del Tarjetón del Problema -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                    
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                        <div>
+                            <span id="problem-category-badge" class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-950 text-blue-400 border border-blue-800 uppercase tracking-wider mb-2">
+                                CÁLCULO DE ALARGAMIENTO (LEY DE HOOKE)
+                            </span>
+                            <h2 id="problem-title" class="text-2xl font-bold text-white tracking-tight">
+                                Ejercicio Práctico #1
+                            </h2>
+                        </div>
+
+                        <!-- Marcador de Aciertos y Racha -->
+                        <div class="flex items-center gap-3 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
+                            <div class="text-center">
+                                <span class="text-[10px] text-slate-400 font-bold uppercase block">Aciertos</span>
+                                <span id="score-hits" class="text-lg font-mono font-bold text-emerald-400">0</span>
+                            </div>
+                            <div class="w-px h-6 bg-slate-800"></div>
+                            <div class="text-center">
+                                <span class="text-[10px] text-slate-400 font-bold uppercase block">Racha</span>
+                                <span id="score-streak" class="text-lg font-mono font-bold text-amber-400">0 🔥</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enunciado del Problema (Renderizado corregido sin código bruto LaTeX) -->
+                    <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-5 text-slate-200 text-base leading-relaxed">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Enunciado del problema:</div>
+                        <div id="problem-text-container" class="space-y-2">
+                            <!-- Inyectado dinámicamente mediante JS -->
+                        </div>
+                    </div>
+
+                    <!-- Entrada de Respuesta y Botones de Acción -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-2">
+                        <div class="flex items-center gap-3 flex-grow max-w-md">
+                            <span class="text-xs font-medium text-slate-400 whitespace-nowrap">Tu Respuesta:</span>
+                            <div class="relative flex-grow">
+                                <input type="text" id="user-answer" placeholder="Ej: 1.52" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 font-mono text-sm focus:border-cyan-500 focus:outline-none pr-12">
+                                <span id="unit-badge" class="absolute right-3 top-2.5 text-xs font-mono text-slate-400">mm</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                            <button onclick="checkAnswer()" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20">
+                                <i class="fa-solid fa-check"></i> Comprobar
+                            </button>
+                            <button onclick="toggleHint()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-medium text-sm transition flex items-center justify-center gap-2 border border-slate-700">
+                                <i class="fa-solid fa-lightbulb"></i> Pista
+                            </button>
+                            <button onclick="nextProblem()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-sm transition flex items-center justify-center gap-2 border border-slate-700">
+                                <i class="fa-solid fa-shuffle"></i> Nuevo Problema
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Banner de Feedback (Acierto / Error) -->
+                    <div id="problem-feedback" class="hidden p-4 rounded-xl border transition-all text-sm"></div>
+
+                    <!-- Bloque de Pista -->
+                    <div id="hint-box" class="hidden p-4 rounded-xl bg-amber-950/40 border border-amber-800/60 text-amber-200 text-xs space-y-2">
+                        <div class="font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb"></i> Pista para resolver:
+                        </div>
+                        <div id="hint-content" class="font-mono text-slate-300"></div>
+                    </div>
+
+                    <!-- Bloque de Solución Paso a Paso -->
+                    <div id="solution-box" class="hidden p-5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs space-y-3">
+                        <div class="font-bold text-cyan-400 text-sm border-b border-slate-800 pb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-square-root-variable"></i> Solución Detallada Paso a Paso:
+                        </div>
+                        <div id="solution-content" class="space-y-2 font-mono leading-relaxed"></div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: TEST TEÓRICO INTERACTIVO -->
+        <!-- ========================================== -->
+        <section id="sec-quiz" class="tab-content hidden space-y-6">
+            <div class="max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-graduation-cap text-cyan-400"></i> Test de Cuestiones Teóricas
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">Demuestra tus conocimientos sobre la Ley de Hooke, elasticidad y módulo de Young.</p>
+                    </div>
+                    <span id="quiz-progress" class="text-xs font-mono bg-slate-800 px-3 py-1 rounded-full text-cyan-400 border border-slate-700">Pregunta 1/5</span>
+                </div>
+
+                <div id="quiz-container" class="space-y-5">
+                    <!-- Inyectado por JS -->
+                </div>
+
+                <div class="flex justify-between items-center pt-2">
+                    <button id="quiz-prev-btn" onclick="prevQuizQuestion()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 disabled:opacity-40">Anterior</button>
+                    <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="px-5 py-2 rounded-xl bg-cyan-600 text-white text-xs hover:bg-cyan-500 font-medium">Siguiente</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: CONVERSOR DE UNIDADES -->
+        <!-- ========================================== -->
+        <section id="sec-conversor" class="tab-content hidden space-y-6">
+            <div class="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                <div class="border-b border-slate-800 pb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-right-left text-cyan-400"></i> Conversor de Unidades de Ingeniería
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Herramienta rápida para conversión entre Pa, MPa, N/mm², bar, kN y m².</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tensión y Presión -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Tensión / Presión</h3>
+                        <div class="space-y-2">
+                            <label class="text-xs text-slate-400 block">Valor de entrada:</label>
+                            <input type="number" id="conv-stress-val" value="100" oninput="convertUnits()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono">
+                            
+                            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2">
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">MPa:</span> <span id="c-mpa" class="text-cyan-300">100</span></div>
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">N/mm²:</span> <span id="c-nmm2" class="text-cyan-300">100</span></div>
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">Pa:</span> <span id="c-pa" class="text-slate-300">1e8</span></div>
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">bar:</span> <span id="c-bar" class="text-slate-300">1000</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fuerza -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Fuerza</h3>
+                        <div class="space-y-2">
+                            <label class="text-xs text-slate-400 block">Valor en kN:</label>
+                            <input type="number" id="conv-force-val" value="15" oninput="convertUnits()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono">
+                            
+                            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2">
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">N:</span> <span id="c-n" class="text-amber-300">15000</span></div>
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">kN:</span> <span id="c-kn" class="text-amber-300">15</span></div>
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">MN:</span> <span id="c-mn" class="text-slate-300">0.015</span></div>
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">kp (kgf):</span> <span id="c-kp" class="text-slate-300">1529.5</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800/80 bg-slate-900/60 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            ElasticLab · Recurso Educativo Interactivo para 1º de Bachillerato (Tecnología e Ingeniería)
+        </div>
+    </footer>
+
+    <!-- LOGICA JAVASCRIPT DE LA APLICACIÓN -->
+    <script>
+        // --- BASE DE DATOS DE MATERIALES ---
+        const MATERIALS = {
+            acero: { name: 'Acero Estructural', E: 210, yield: 250, ultimate: 400, maxStrain: 0.25 },
+            aluminio: { name: 'Aluminio 6061-T6', E: 70, yield: 240, ultimate: 290, maxStrain: 0.18 },
+            laton: { name: 'Latón Industrial', E: 100, yield: 200, ultimate: 380, maxStrain: 0.30 },
+            cobre: { name: 'Cobre Recocido', E: 120, yield: 70, ultimate: 220, maxStrain: 0.35 },
+            titanio: { name: 'Titanio Grado 5', E: 115, yield: 830, ultimate: 900, maxStrain: 0.14 }
+        };
+
+        // --- ESTADO GLOBAL ---
+        let autoPullInterval = null;
+        let isAutoPulling = false;
+        
+        // Estado del módulo de ejercicios
+        let problemNumber = 1;
+        let scoreHits = 0;
+        let currentStreak = 0;
+        let currentProblem = null;
+
+        // Estado del test teórico
+        let currentQuizIndex = 0;
+        const quizQuestions = [
+            {
+                q: "¿Qué establece la Ley de Hooke dentro del rango elástico de un material?",
+                options: [
+                    "Las deformaciones son inversamente proporcionales a las tensiones.",
+                    "El alargamiento es directamente proporcional a la fuerza aplicada.",
+                    "La fuerza aplicada es constante en todo el proceso de tracción.",
+                    "El material se deforma permanentemente desde el inicio."
+                ],
+                answer: 1,
+                explanation: "La Ley de Hooke ($F = k \\cdot \\Delta L$ o $\\sigma = E \\cdot \\varepsilon$) establece que en el régimen elástico el alargamiento es directamente proporcional a la fuerza aplicada."
+            },
+            {
+                q: "¿Qué representa el Módulo de Young ($E$)?",
+                options: [
+                    "La tenacidad total a la rotura del material.",
+                    "La rigidez del material en su régimen elástico.",
+                    "La fuerza máxima que aguanta la sección.",
+                    "La ductilidad o capacidad de formar hilos."
+                ],
+                answer: 1,
+                explanation: "El Módulo de Young ($E$) mide la rigidez de un material: a mayor valor de $E$, menor alargamiento sufrirá ante la misma tensión."
+            },
+            {
+                q: "Si superamos el límite elástico (punto de fluencia $\\sigma_y$), ¿qué le ocurre al material?",
+                options: [
+                    "Recupera totalmente su forma al retirar la carga.",
+                    "Se rompe de manera instantánea y frágil.",
+                    "Experimenta deformaciones plásticas permanentes.",
+                    "Su módulo de elasticidad se duplica."
+                ],
+                answer: 2,
+                explanation: "Al rebasar el límite elástico $\\sigma_y$, entramos en la zona plástica. El material ya no recuperará su longitud inicial $L_0$ completamente."
+            },
+            {
+                q: "¿Qué es el fenómeno de estricción (cuello) durante el ensayo de tracción?",
+                options: [
+                    "El aumento repentino del diámetro del elemento.",
+                    "La disminución local concentrada de la sección transversal previa a la rotura.",
+                    "El endurecimiento por deformación en frío.",
+                    "La disminución de la longitud total."
+                ],
+                answer: 1,
+                explanation: "La estricción es la reducción localizada de la sección transversal de la probeta tras alcanzar la tensión máxima de tracción."
+            },
+            {
+                q: "¿Cuál es la unidad del Módulo de Young en el Sistema Internacional?",
+                options: [
+                    "Newton (N)",
+                    "Pascal (Pa) o $N/m^2$",
+                    "Milímetro ($mm$)",
+                    "Adimensional (sin unidades)"
+                ],
+                answer: 1,
+                explanation: "El Módulo de Young se mide en pascales (Pa) o sus derivados comunes en ingeniería como el megapascal (MPa) o gigapascal (GPa)."
+            }
+        ];
+
+        // --- INICIALIZACIÓN DE LA APLICACIÓN ---
+        window.addEventListener('load', () => {
+            updateSimulation();
+            runCalculator();
+            generateNewProblem();
+            renderQuizQuestion();
+            convertUnits();
+            
+            // Re-renderizar KaTeX tras cargar librerías
+            setTimeout(() => {
+                renderMathIn(document.body);
+            }, 300);
+        });
+
+        // Auxiliar para KaTeX
+        function renderMathIn(element) {
+            if (window.renderMathInElement && element) {
+                try {
+                    window.renderMathInElement(element, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false},
+                            {left: '\\(', right: '\\)', display: false},
+                            {left: '\\[', right: '\\]', display: true}
+                        ],
+                        throwOnError: false
+                    });
+                } catch(e) { console.log('KaTeX error', e); }
+            }
+        }
+
+        // --- GESTIÓN DE PESTAÑAS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'text-cyan-400'));
+            
+            const targetSec = document.getElementById(`sec-${tabId}`);
+            const targetBtn = document.getElementById(`tab-btn-${tabId}`);
+            
+            if (targetSec) targetSec.classList.remove('hidden');
+            if (targetBtn) targetBtn.classList.add('active', 'text-cyan-400');
+
+            if (tabId === 'simulador') {
+                setTimeout(updateSimulation, 50);
+            } else if (tabId === 'problemas') {
+                setTimeout(() => renderMathIn(document.getElementById('sec-problemas')), 50);
+            }
+        }
+
+        // --- SIMULADOR 2D Y DIBUJO DE GRÁFICA ---
+        function updateSimulation() {
+            const matKey = document.getElementById('sim-material').value;
+            const mat = MATERIALS[matKey];
+            
+            const L0 = parseFloat(document.getElementById('input-L0').value);
+            const d = parseFloat(document.getElementById('input-d').value);
+            const F_kN = parseFloat(document.getElementById('input-F').value);
+
+            // Actualizar etiquetas UI
+            document.getElementById('val-L0').innerText = `${L0.toFixed(1)} m`;
+            document.getElementById('val-d').innerText = `${d.toFixed(1)} mm`;
+            document.getElementById('val-F').innerText = `${F_kN.toFixed(1)} kN`;
+            document.getElementById('mat-prop-badge').innerText = `E = ${mat.E} GPa | σ_y = ${mat.yield} MPa`;
+
+            // Cálculos físicos
+            const A_mm2 = (Math.PI * Math.pow(d, 2)) / 4;
+            const A_m2 = A_mm2 * 1e-6;
+            const F_N = F_kN * 1000;
+            const sigma_MPa = F_N / A_mm2; // MPa = N/mm2
+            
+            // Deformación elástica y alargamiento
+            const E_MPa = mat.E * 1000;
+            let strain = sigma_MPa / E_MPa;
+            let isYielded = sigma_MPa >= mat.yield;
+            let isFractured = sigma_MPa >= mat.ultimate || strain >= mat.maxStrain;
+
+            // Ajuste no lineal si pasa del límite elástico
+            if (isYielded && !isFractured) {
+                const plasticStrain = Math.pow((sigma_MPa - mat.yield) / (mat.ultimate - mat.yield + 1), 2) * 0.05;
+                strain += plasticStrain;
+            }
+
+            const deltaL_mm = strain * (L0 * 1000);
+            const L_final_m = L0 + (deltaL_mm / 1000);
+            const safetyFactor = mat.yield / (sigma_MPa || 0.001);
+
+            // Actualizar Métricas
+            document.getElementById('m-area').innerHTML = `${A_mm2.toFixed(1)} <span class="text-xs text-slate-400 font-normal">mm²</span>`;
+            document.getElementById('m-area-m2').innerText = `${A_m2.toExponential(2)} m²`;
+            
+            document.getElementById('m-stress').innerHTML = `${sigma_MPa.toFixed(1)} <span class="text-xs text-slate-400 font-normal">MPa</span>`;
+            document.getElementById('m-strain').innerHTML = `${(strain * 100).toFixed(3)} <span class="text-xs text-slate-400 font-normal">%</span>`;
+            document.getElementById('m-strain-raw').innerText = strain.toFixed(6);
+            
+            document.getElementById('m-dl').innerHTML = `${deltaL_mm.toFixed(2)} <span class="text-xs text-slate-400 font-normal">mm</span>`;
+            document.getElementById('m-lfinal').innerHTML = `${L_final_m.toFixed(4)} <span class="text-xs text-slate-400 font-normal">m</span>`;
+            
+            const sfElem = document.getElementById('m-safety');
+            const sfLabel = document.getElementById('m-safety-label');
+            if (isFractured) {
+                sfElem.innerText = "ROTURA";
+                sfElem.className = "text-lg font-bold font-mono text-rose-500";
+                sfLabel.innerText = "Pieza fracturada";
+                sfLabel.className = "text-[10px] text-rose-500 block";
+            } else if (isYielded) {
+                sfElem.innerText = safetyFactor.toFixed(2);
+                sfElem.className = "text-lg font-bold font-mono text-amber-400";
+                sfLabel.innerText = "Fluencia plástica (n < 1)";
+                sfLabel.className = "text-[10px] text-amber-400 block";
+            } else {
+                sfElem.innerText = safetyFactor.toFixed(2);
+                sfElem.className = "text-lg font-bold font-mono text-emerald-400";
+                sfLabel.innerText = "Zona Segura (n ≥ 1)";
+                sfLabel.className = "text-[10px] text-emerald-500 block";
+            }
+
+            // Actualizar tarjeta de estado
+            updateStatusCard(isYielded, isFractured, sigma_MPa, mat);
+
+            // Redibujar Canvas Probeta 2D y Gráfica
+            drawSpecimenCanvas(strain, isYielded, isFractured, sigma_MPa / mat.yield);
+            drawCurveCanvas(mat, strain, sigma_MPa, isFractured);
+        }
+
+        function updateStatusCard(isYielded, isFractured, sigma, mat) {
+            const card = document.getElementById('material-status-card');
+            const title = document.getElementById('status-title');
+            const desc = document.getElementById('status-desc');
+            const icon = document.getElementById('status-icon');
+
+            if (isFractured) {
+                card.className = "p-3 rounded-xl bg-rose-950/60 border border-rose-500/50 text-rose-300 flex items-center gap-3";
+                icon.className = "fa-solid fa-triangle-exclamation text-xl text-rose-400";
+                title.innerText = "¡ROTURA DEL MATERIAL!";
+                desc.innerText = "La tensión ha superado la resistencia máxima del material.";
+            } else if (isYielded) {
+                card.className = "p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 text-amber-300 flex items-center gap-3";
+                icon.className = "fa-solid fa-triangle-exclamation text-xl text-amber-400";
+                title.innerText = "Zona Plástica (Fluencia / Estricción)";
+                desc.innerText = "El material sufre deformación permanente e irrecuperable.";
+            } else {
+                card.className = "p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 flex items-center gap-3";
+                icon.className = "fa-solid fa-shield-halved text-xl text-emerald-400";
+                title.innerText = "Zona Elástica (Ley de Hooke)";
+                desc.innerText = "El material recuperar su forma inicial al retirar la fuerza.";
+            }
+        }
+
+        // Dibujo de la Probeta en 2D en Canvas
+        function drawSpecimenCanvas(strain, isYielded, isFractured, stressRatio) {
+            const canvas = document.getElementById('specimenCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Ajustar resolución DPI
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width;
+            const h = rect.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Mordazas hidráulicas
+            const gripW = 50;
+            const gripH = h - 20;
+            
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(10, 10, gripW, gripH); // Mordaza izquierda
+            ctx.fillRect(w - gripW - 10, 10, gripW, gripH); // Mordaza derecha
+
+            // Textura mordazas
+            ctx.fillStyle = '#475569';
+            for(let i=15; i<gripH+10; i+=8) {
+                ctx.fillRect(12, i, gripW-4, 2);
+                ctx.fillRect(w - gripW - 8, i, gripW-4, 2);
+            }
+
+            // Cuerpo de la probeta
+            const startX = 10 + gripW;
+            const endX_base = w - gripW - 10;
+            
+            // Extensión visual
+            const visualStretch = Math.min(strain * 180, 70);
+            const currentEndX = endX_base + (isFractured ? visualStretch * 0.5 : visualStretch);
+            const totalLen = currentEndX - startX;
+
+            const centerY = h / 2;
+            const radius = 18;
+
+            // Indicador de Estricción (reducción del radio central)
+            const necking = isYielded ? Math.min(stressRatio * 0.35, 0.5) : 0;
+            document.getElementById('necking-indicator').innerText = `Estricción: ${(necking*100).toFixed(0)}%`;
+
+            // Color mapa de calor según tensión
+            let gradient = ctx.createLinearGradient(startX, 0, currentEndX, 0);
+            if (isFractured) {
+                gradient.addColorStop(0, '#ef4444');
+                gradient.addColorStop(1, '#ef4444');
+            } else if (isYielded) {
+                gradient.addColorStop(0, '#f59e0b');
+                gradient.addColorStop(0.5, '#ef4444');
+                gradient.addColorStop(1, '#f59e0b');
+            } else {
+                gradient.addColorStop(0, '#0284c7');
+                gradient.addColorStop(0.5, '#38bdf8');
+                gradient.addColorStop(1, '#0284c7');
+            }
+
+            if (!isFractured) {
+                // Dibujar Probeta entera con cuello
+                ctx.beginPath();
+                ctx.moveTo(startX, centerY - radius);
+                
+                // Curva superior con estricción
+                ctx.quadraticCurveTo(startX + totalLen*0.5, centerY - radius*(1-necking), currentEndX, centerY - radius);
+                ctx.lineTo(currentEndX, centerY + radius);
+                
+                // Curva inferior con estricción
+                ctx.quadraticCurveTo(startX + totalLen*0.5, centerY + radius*(1-necking), startX, centerY + radius);
+                ctx.closePath();
+
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Marcas de galga (puntos de medición de longitud)
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(startX + totalLen*0.25, centerY, 3, 0, Math.PI*2);
+                ctx.arc(startX + totalLen*0.75, centerY, 3, 0, Math.PI*2);
+                ctx.fill();
+
+            } else {
+                // Dibujar Probeta Rotada en 2 piezas
+                const gap = 20;
+                const midX = startX + totalLen*0.5;
+
+                // Pieza izquierda
+                ctx.beginPath();
+                ctx.moveTo(startX, centerY - radius);
+                ctx.lineTo(midX - gap/2, centerY - radius);
+                ctx.lineTo(midX - gap/2 + 4, centerY - 4);
+                ctx.lineTo(midX - gap/2 - 2, centerY + 4);
+                ctx.lineTo(midX - gap/2, centerY + radius);
+                ctx.lineTo(startX, centerY + radius);
+                ctx.closePath();
+                ctx.fillStyle = '#ef4444';
+                ctx.fill();
+
+                // Pieza derecha
+                ctx.beginPath();
+                ctx.moveTo(midX + gap/2, centerY - radius);
+                ctx.lineTo(currentEndX, centerY - radius);
+                ctx.lineTo(currentEndX, centerY + radius);
+                ctx.lineTo(midX + gap/2, centerY + radius);
+                ctx.lineTo(midX + gap/2 + 4, centerY + 4);
+                ctx.lineTo(midX + gap/2 - 2, centerY - 4);
+                ctx.closePath();
+                ctx.fillStyle = '#ef4444';
+                ctx.fill();
+            }
+        }
+
+        // Dibujo del Diagrama Tensión - Deformación Unitaria en Canvas
+        function drawCurveCanvas(mat, currentStrain, currentSigma, isFractured) {
+            const canvas = document.getElementById('curveCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width;
+            const h = rect.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const padL = 45, padR = 25, padB = 30, padT = 20;
+            const plotW = w - padL - padR;
+            const plotH = h - padB - padT;
+
+            // Escalas
+            const maxSigma = mat.ultimate * 1.25;
+            const maxEps = mat.maxStrain * 1.2;
+
+            function toX(eps) { return padL + (eps / maxEps) * plotW; }
+            function toY(sig) { return h - padB - (sig / maxSigma) * plotH; }
+
+            // Rejilla de fondo
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for(let i=0; i<=4; i++) {
+                let y = padT + (plotH/4)*i;
+                ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+                
+                let x = padL + (plotW/4)*i;
+                ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h - padB); ctx.stroke();
+            }
+
+            // Ejes Cartesisanos
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB);
+            ctx.stroke();
+
+            // Etiqueta de Ejes
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px sans-serif';
+            ctx.fillText('Tensión σ (MPa)', padL - 10, padT - 8);
+            ctx.fillText('Deformación ε', w - padR - 60, h - 8);
+
+            // Puntos clave de la curva del material
+            const epsYield = mat.yield / (mat.E * 1000);
+            const epsUlt = mat.maxStrain * 0.7;
+            const epsFract = mat.maxStrain;
+
+            // Trazado de la Curva Característica
+            ctx.beginPath();
+            ctx.moveTo(toX(0), toY(0));
+            // Tramo Elástico
+            ctx.lineTo(toX(epsYield), toY(mat.yield));
+            // Tramo Plástico hasta resistencia máxima
+            ctx.quadraticCurveTo(toX((epsYield + epsUlt)/2), toY(mat.ultimate), toX(epsUlt), toY(mat.ultimate));
+            // Estricción hasta rotura
+            ctx.lineTo(toX(epsFract), toY(mat.ultimate * 0.8));
+            
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // Sombra bajo la curva elástica
+            ctx.beginPath();
+            ctx.moveTo(toX(0), toY(0));
+            ctx.lineTo(toX(epsYield), toY(mat.yield));
+            ctx.lineTo(toX(epsYield), h - padB);
+            ctx.lineTo(toX(0), h - padB);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+            ctx.fill();
+
+            // Punto de Fluencia (Límite Elástico)
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(toX(epsYield), toY(mat.yield), 4, 0, Math.PI*2);
+            ctx.fill();
+
+            // Cursor Animado del Estado Actual
+            const curX = toX(currentStrain);
+            const curY = toY(currentSigma);
+
+            // Proyecciones punteadas
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = '#f59e0b';
+            ctx.beginPath(); ctx.moveTo(curX, h - padB); ctx.lineTo(curX, curY); ctx.lineTo(padL, curY); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Punto interactivo
+            ctx.fillStyle = isFractured ? '#ef4444' : '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(curX, curY, 6, 0, Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // Controles Animación Automática (Ejecutar Ensayo)
+        function toggleAutoPull() {
+            const btn = document.getElementById('btn-auto-pull');
+            const icon = document.getElementById('icon-auto-pull');
+            const text = document.getElementById('text-auto-pull');
+            const slider = document.getElementById('input-F');
+
+            if (!isAutoPulling) {
+                isAutoPulling = true;
+                icon.className = "fa-solid fa-pause";
+                text.innerText = "Pausar Ensayo Progresivo";
+                slider.value = 0;
+
+                autoPullInterval = setInterval(() => {
+                    let val = parseFloat(slider.value) + 0.8;
+                    slider.value = val;
+                    updateSimulation();
+
+                    const mat = MATERIALS[document.getElementById('sim-material').value];
+                    const d = parseFloat(document.getElementById('input-d').value);
+                    const A = (Math.PI * d * d)/4;
+                    const maxF = (mat.ultimate * A)/1000;
+
+                    if (val >= maxF || val >= parseFloat(slider.max)) {
+                        toggleAutoPull();
+                    }
+                }, 40);
+            } else {
+                isAutoPulling = false;
+                clearInterval(autoPullInterval);
+                icon.className = "fa-solid fa-play";
+                text.innerText = "Ejecutar Ensayo Progresivo";
+            }
+        }
+
+        function resetSimulation() {
+            if (isAutoPulling) toggleAutoPull();
+            document.getElementById('input-F').value = 25;
+            document.getElementById('input-L0').value = 2.0;
+            document.getElementById('input-d').value = 16.0;
+            updateSimulation();
+        }
+
+        // --- CALCULADORA RÁPIDA ---
+        function runCalculator() {
+            const F = parseFloat(document.getElementById('calc-f').value) || 0;
+            const E = parseFloat(document.getElementById('calc-e').value) || 1;
+            const L = parseFloat(document.getElementById('calc-l').value) || 1;
+            const d = parseFloat(document.getElementById('calc-d').value) || 1;
+
+            const A = (Math.PI * d * d) / 4;
+            const sigma = (F * 1000) / A; // MPa
+            const eps = sigma / (E * 1000);
+            const deltaL = eps * (L * 1000);
+
+            document.getElementById('calc-res-a').innerText = `${A.toFixed(2)} mm²`;
+            document.getElementById('calc-res-s').innerText = `${sigma.toFixed(2)} MPa`;
+            document.getElementById('calc-res-eps').innerText = eps.toFixed(6);
+            document.getElementById('calc-res-dl').innerText = `${deltaL.toFixed(3)} mm`;
+        }
+
+        // --- MÓDULO DE GENERACIÓN DE PROBLEMAS (CORREGIDO) ---
+        function generateNewProblem() {
+            const matKeys = Object.keys(MATERIALS);
+            const matKey = matKeys[Math.floor(Math.random() * matKeys.length)];
+            const mat = MATERIALS[matKey];
+
+            // Parámetros aleatorios físicamente válidos
+            const L0 = parseFloat((1.5 + Math.random() * 3.5).toFixed(1)); // 1.5 a 5.0 m
+            const d = Math.floor(10 + Math.random() * 18); // 10 a 28 mm
+            const A_mm2 = (Math.PI * d * d) / 4;
+            
+            // Elegir fuerza que permanezca en régimen elástico (<= 85% de fluencia)
+            const maxF_kN = (mat.yield * 0.85 * A_mm2) / 1000;
+            const F_kN = parseFloat((2 + Math.random() * (maxF_kN - 2)).toFixed(1));
+
+            const deltaL_mm = (F_kN * 1000 * L0) / (A_mm2 * mat.E);
+            const sigma_MPa = (F_kN * 1000) / A_mm2;
+
+            const problemTypes = [
+                {
+                    cat: "CÁLCULO DE ALARGAMIENTO (LEY DE HOOKE)",
+                    title: `Ejercicio Práctico #${problemNumber}`,
+                    unit: "mm",
+                    val: deltaL_mm,
+                    text: `Una varilla de <strong class="text-cyan-300">${mat.name}</strong> ($E = ${mat.E}\\text{ GPa}$) tiene una longitud inicial $L_0 = ${L0}\\text{ m}$ y un diámetro $d = ${d}\\text{ mm}$. Si se aplica una carga de tracción $F = ${F_kN}\\text{ kN}$ en su rango elástico, halla el alargamiento total $\\Delta L$ en $\\text{mm}$.`,
+                    hint: `A = \\frac{\\pi \\cdot d^2}{4} = ${A_mm2.toFixed(2)}\\text{ mm}^2. \\quad \\Delta L = \\frac{F \\cdot L_0}{A \\cdot E}`,
+                    steps: [
+                        `1. \\text{Área de la sección transversal: } A = \\frac{\\pi \\cdot ${d}^2}{4} = ${A_mm2.toFixed(2)}\\text{ mm}^2`,
+                        `2. \\text{Fuerza en Newtons: } F = ${F_kN}\\text{ kN} = ${(F_kN*1000).toFixed(0)}\\text{ N}`,
+                        `3. \\text{Sustitución en Ley de Hooke: } \\Delta L = \\frac{${(F_kN*1000).toFixed(0)} \\cdot ${L0}}{${A_mm2.toFixed(2)} \\cdot ${(mat.E * 1000).toFixed(0)}} \\text{ m}`,
+                        `4. \\text{Resultado en mm: } \\Delta L = ${deltaL_mm.toFixed(3)}\\text{ mm}`
+                    ]
+                },
+                {
+                    cat: "CÁLCULO DE FUERZA DE TRACCIÓN",
+                    title: `Ejercicio Práctico #${problemNumber}`,
+                    unit: "kN",
+                    val: F_kN,
+                    text: `¿Qué fuerza de tracción $F$ en $\\text{kN}$ se debe aplicar a un elemento de <strong class="text-cyan-300">${mat.name}</strong> ($E = ${mat.E}\\text{ GPa}$) de longitud $L_0 = ${L0}\\text{ m}$ y diámetro $d = ${d}\\text{ mm}$ para producir un alargamiento $\\Delta L = ${deltaL_mm.toFixed(3)}\\text{ mm}$?`,
+                    hint: `F = \\frac{\\Delta L \\cdot A \\cdot E}{L_0}`,
+                    steps: [
+                        `1. \\text{Área de la sección: } A = ${A_mm2.toFixed(2)}\\text{ mm}^2`,
+                        `2. \\text{Despejar fuerza: } F = \\frac{\\Delta L \\cdot A \\cdot E}{L_0}`,
+                        `3. \\text{Sustitución: } F = \\frac{${deltaL_mm.toFixed(3)} \\cdot ${A_mm2.toFixed(2)} \\cdot ${(mat.E * 1000).toFixed(0)}}{${(L0 * 1000).toFixed(0)}} = ${(F_kN*1000).toFixed(0)}\\text{ N}`,
+                        `4. \\text{Resultado en kN: } F = ${F_kN.toFixed(1)}\\text{ kN}`
+                    ]
+                }
+            ];
+
+            currentProblem = problemTypes[Math.floor(Math.random() * problemTypes.length)];
+
+            // Actualizar Interfaz
+            document.getElementById('problem-category-badge').innerText = currentProblem.cat;
+            document.getElementById('problem-title').innerText = `Ejercicio Práctico #${problemNumber}`;
+            document.getElementById('problem-text-container').innerHTML = currentProblem.text;
+            document.getElementById('unit-badge').innerText = currentProblem.unit;
+            document.getElementById('user-answer').placeholder = `Ej: ${currentProblem.val.toFixed(2)}`;
+
+            // Ocultar paneles auxiliares
+            document.getElementById('problem-feedback').className = 'hidden';
+            document.getElementById('hint-box').className = 'hidden';
+            document.getElementById('solution-box').className = 'hidden';
+
+            // Renderizado de matemáticas
+            setTimeout(() => {
+                renderMathIn(document.getElementById('problem-text-container'));
+            }, 50);
+        }
+
+        function checkAnswer() {
+            if (!currentProblem) return;
+
+            const userStr = document.getElementById('user-answer').value.replace(',', '.').trim();
+            const userVal = parseFloat(userStr);
+            const feedback = document.getElementById('problem-feedback');
+
+            if (isNaN(userVal)) {
+                feedback.className = "p-4 rounded-xl bg-amber-950/60 border border-amber-800 text-amber-300 text-xs";
+                feedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Por favor, introduce un número válido.';
+                feedback.classList.remove('hidden');
+                return;
+            }
+
+            const targetVal = currentProblem.val;
+            const diffPct = Math.abs((userVal - targetVal) / targetVal) * 100;
+
+            if (diffPct <= 3.5) { // Tolerancia aceptable 3.5%
+                scoreHits++;
+                currentStreak++;
+                document.getElementById('score-hits').innerText = scoreHits;
+                document.getElementById('score-streak').innerText = `${currentStreak} 🔥`;
+
+                feedback.className = "p-4 rounded-xl bg-emerald-950/70 border border-emerald-500/50 text-emerald-300 text-xs space-y-2";
+                feedback.innerHTML = `
+                    <div class="font-bold flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-circle-check text-emerald-400"></i> ¡Respuesta Correcta! Excelente trabajo.
+                    </div>
+                    <div>Valor exacto: <strong>${targetVal.toFixed(3)} ${currentProblem.unit}</strong> (Margen de error: ${diffPct.toFixed(2)}%)</div>
+                `;
+                
+                // Mostrar Solución
+                showSolution();
+
+            } else {
+                currentStreak = 0;
+                document.getElementById('score-streak').innerText = `0 🔥`;
+
+                feedback.className = "p-4 rounded-xl bg-rose-950/70 border border-rose-500/50 text-rose-300 text-xs space-y-2";
+                feedback.innerHTML = `
+                    <div class="font-bold flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-circle-xmark text-rose-400"></i> Respuesta Incorrecta
+                    </div>
+                    <div>Tu valor: <strong>${userVal} ${currentProblem.unit}</strong> | Valor esperado: <strong>${targetVal.toFixed(3)} ${currentProblem.unit}</strong>. Revisa las unidades y los cálculos.</div>
+                `;
+                
+                showSolution();
+            }
+
+            feedback.classList.remove('hidden');
+        }
+
+        function nextProblem() {
+            problemNumber++;
+            document.getElementById('user-answer').value = '';
+            generateNewProblem();
+        }
+
+        function toggleHint() {
+            const hintBox = document.getElementById('hint-box');
+            const hintContent = document.getElementById('hint-content');
+            if (hintBox.classList.contains('hidden')) {
+                hintContent.innerHTML = currentProblem.hint;
+                hintBox.classList.remove('hidden');
+                renderMathIn(hintContent);
+            } else {
+                hintBox.classList.add('hidden');
+            }
+        }
+
+        function showSolution() {
+            const solBox = document.getElementById('solution-box');
+            const solContent = document.getElementById('solution-content');
+            solContent.innerHTML = currentProblem.steps.map(s => `<div class="p-1 border-b border-slate-900">${s}</div>`).join('');
+            solBox.classList.remove('hidden');
+            renderMathIn(solContent);
+        }
+
+        // --- TEST TEÓRICO ---
+        function renderQuizQuestion() {
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('quiz-progress').innerText = `Pregunta ${currentQuizIndex + 1}/${quizQuestions.length}`;
+            
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = `
+                <div class="text-slate-100 font-medium text-base">${q.q}</div>
+                <div class="space-y-2 pt-2">
+                    ${q.options.map((opt, idx) => `
+                        <button onclick="selectQuizOption(${idx})" class="quiz-opt-btn w-full text-left p-3 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 transition flex items-center justify-between">
+                            <span>${String.fromCharCode(65 + idx)}) ${opt}</span>
+                            <i class="fa-regular fa-circle text-slate-600"></i>
+                        </button>
+                    `).join('')}
+                </div>
+                <div id="quiz-exp-box" class="hidden p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 leading-relaxed"></div>
+            `;
+
+            document.getElementById('quiz-prev-btn').disabled = currentQuizIndex === 0;
+            document.getElementById('quiz-next-btn').disabled = currentQuizIndex === quizQuestions.length - 1;
+
+            setTimeout(() => renderMathIn(container), 50);
+        }
+
+        function selectQuizOption(idx) {
+            const q = quizQuestions[currentQuizIndex];
+            const btns = document.querySelectorAll('.quiz-opt-btn');
+            
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.answer) {
+                    btn.className = "w-full text-left p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 text-xs flex items-center justify-between";
+                } else if (i === idx) {
+                    btn.className = "w-full text-left p-3 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs flex items-center justify-between";
+                }
+            });
+
+            const expBox = document.getElementById('quiz-exp-box');
+            expBox.innerHTML = `<span class="font-bold text-cyan-400 block mb-1">Explicación:</span> ${q.explanation}`;
+            expBox.classList.remove('hidden');
+            renderMathIn(expBox);
+        }
+
+        function prevQuizQuestion() {
+            if (currentQuizIndex > 0) { currentQuizIndex--; renderQuizQuestion(); }
+        }
+
+        function nextQuizQuestion() {
+            if (currentQuizIndex < quizQuestions.length - 1) { currentQuizIndex++; renderQuizQuestion(); }
+        }
+
+        // --- CONVERSOR DE UNIDADES ---
+        function convertUnits() {
+            // Tensión
+            const sVal = parseFloat(document.getElementById('conv-stress-val').value) || 0;
+            document.getElementById('c-mpa').innerText = sVal.toFixed(2);
+            document.getElementById('c-nmm2').innerText = sVal.toFixed(2);
+            document.getElementById('c-pa').innerText = (sVal * 1e6).toExponential(2);
+            document.getElementById('c-bar').innerText = (sVal * 10).toFixed(1);
+
+            // Fuerza
+            const fVal = parseFloat(document.getElementById('conv-force-val').value) || 0;
+            document.getElementById('c-kn').innerText = fVal.toFixed(2);
+            document.getElementById('c-n').innerText = (fVal * 1000).toFixed(0);
+            document.getElementById('c-mn').innerText = (fVal / 1000).toFixed(4);
+            document.getElementById('c-kp').innerText = (fVal * 101.97).toFixed(1);
+        }
+    </script>
+</body>
+</html>
