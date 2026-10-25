@@ -31,13 +31,12 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- KaTeX CSS & JS para renderizado perfecto de matemáticas -->
+    <!-- KaTeX CSS & JS para renderizado de matemáticas -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 
     <style>
-        /* Estilos personalizados para controles y animaciones */
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -74,7 +73,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-bold text-xl tracking-tight text-white">Elastic<span class="text-cyan-400">Lab</span></span>
-                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/50 font-mono">v2.5</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/50 font-mono">v2.6</span>
                         </div>
                         <p class="text-xs text-slate-400 hidden sm:block">Laboratorio Interactivo de Elasticidad y Ley de Hooke</p>
                     </div>
@@ -131,7 +130,7 @@
                     <!-- Selección de Material -->
                     <div class="space-y-1.5">
                         <label class="text-xs font-medium text-slate-300 flex items-center justify-between">
-                            <span>Material de la Probeta</span>
+                            <span>Material de la Probeta Cilíndrica</span>
                             <span id="mat-prop-badge" class="text-[10px] text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">E = 210 GPa</span>
                         </label>
                         <select id="sim-material" onchange="updateSimulation()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
@@ -152,13 +151,14 @@
                         <input type="range" id="input-L0" min="0.5" max="5.0" step="0.1" value="2.0" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
                     </div>
 
-                    <!-- Diámetro d -->
+                    <!-- Diámetro d (Sección Circular) -->
                     <div class="space-y-1.5">
                         <div class="flex justify-between text-xs font-medium text-slate-300">
-                            <span>Diámetro ($d$)</span>
+                            <span>Diámetro de Sección Circular ($d$)</span>
                             <span id="val-d" class="font-mono text-cyan-400">16.0 mm</span>
                         </div>
                         <input type="range" id="input-d" min="5" max="30" step="0.5" value="16.0" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                        <span class="text-[10px] text-slate-400 block italic">Sección circular $A = \frac{\pi \cdot d^2}{4}$</span>
                     </div>
 
                     <!-- Carga Aplicada F -->
@@ -194,7 +194,7 @@
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
                         <div class="flex items-center justify-between mb-2 px-1">
                             <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <i class="fa-solid fa-eye text-cyan-400"></i> Simulación Visual de la Probeta (Ensayo de Tracción)
+                                <i class="fa-solid fa-eye text-cyan-400"></i> Simulación Visual de Probeta Cilíndrica (Ensayo de Tracción)
                             </h3>
                             <span id="necking-indicator" class="text-[11px] text-slate-400 font-mono">Estricción: 0%</span>
                         </div>
@@ -228,7 +228,7 @@
             <!-- Panel de Métricas en Tiempo Real -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
-                    <span class="text-[11px] font-medium text-slate-400">Área Sección ($A$)</span>
+                    <span class="text-[11px] font-medium text-slate-400">Área Circular ($A = \frac{\pi d^2}{4}$)</span>
                     <div id="m-area" class="text-lg font-bold font-mono text-slate-100">201.1 <span class="text-xs text-slate-400 font-normal">mm²</span></div>
                     <span id="m-area-m2" class="text-[10px] text-slate-500 font-mono block">2.01e-4 m²</span>
                 </div>
@@ -240,7 +240,7 @@
                 </div>
 
                 <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-1">
-                    <span class="text-[11px] font-medium text-slate-400">Deformación ($\varepsilon$)</span>
+                    <span class="text-[11px] font-medium text-slate-400">Deformación ($\varepsilon = \frac{\sigma}{E}$)</span>
                     <div id="m-strain" class="text-lg font-bold font-mono text-cyan-300">0.059 <span class="text-xs text-slate-400 font-normal">%</span></div>
                     <span id="m-strain-raw" class="text-[10px] text-slate-500 font-mono block">0.00059</span>
                 </div>
@@ -274,7 +274,7 @@
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-calculator text-cyan-400"></i> Calculadora Directa de la Ley de Hooke
                     </h2>
-                    <p class="text-sm text-slate-400 mt-1">Introduce las magnitudes conocidas para obtener de inmediato el alargamiento, tensión y sección.</p>
+                    <p class="text-sm text-slate-400 mt-1">Cálculo de elementos cilíndricos con sección circular constante.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -296,40 +296,41 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">Diámetro de la sección $d$ (mm)</label>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Diámetro de la sección circular $d$ (mm)</label>
                             <input type="number" id="calc-d" value="12" step="0.5" oninput="runCalculator()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-sm focus:border-cyan-500 focus:outline-none">
                         </div>
                     </div>
 
-                    <!-- Salida de Resultados y Pasos Explicativos -->
+                    <!-- Salida de Resultados -->
                     <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4 flex flex-col justify-between">
                         <div>
                             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 border-b border-slate-800 pb-2">Resultados Calculados</h3>
                             
                             <div class="space-y-3 font-mono">
                                 <div class="flex justify-between items-center text-sm">
-                                    <span class="text-slate-400">Área $A$:</span>
+                                    <span class="text-slate-400">Área circular ($A = \frac{\pi d^2}{4}$):</span>
                                     <span id="calc-res-a" class="text-cyan-300 font-bold">113.10 mm²</span>
                                 </div>
                                 <div class="flex justify-between items-center text-sm">
-                                    <span class="text-slate-400">Tensión $\sigma$:</span>
+                                    <span class="text-slate-400">Tensión ($\sigma = \frac{F}{A}$):</span>
                                     <span id="calc-res-s" class="text-cyan-400 font-bold">88.42 MPa</span>
                                 </div>
                                 <div class="flex justify-between items-center text-sm">
-                                    <span class="text-slate-400">Deformación $\varepsilon$:</span>
+                                    <span class="text-slate-400">Deformación ($\varepsilon = \frac{\sigma}{E}$):</span>
                                     <span id="calc-res-eps" class="text-slate-200">0.000421</span>
                                 </div>
                                 <div class="flex justify-between items-center text-base pt-2 border-t border-slate-800">
-                                    <span class="text-amber-400 font-bold">Alargamiento $\Delta L$:</span>
+                                    <span class="text-amber-400 font-bold">Alargamiento ($\Delta L$):</span>
                                     <span id="calc-res-dl" class="text-amber-400 font-bold text-lg">1.263 mm</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-xs text-slate-400 space-y-1">
-                            <span class="font-semibold text-slate-300 block">Fórmula Empleada:</span>
-                            <div class="text-center py-1 font-serif text-cyan-300 text-sm">
-                                $$\Delta L = \frac{F \cdot L_0}{A \cdot E}$$
+                            <span class="font-semibold text-slate-300 block">Fórmulas empleadas:</span>
+                            <div class="text-center py-1 font-serif text-cyan-300 text-xs space-y-1">
+                                <div>$$A = \frac{\pi \cdot d^2}{4}$$</div>
+                                <div>$$\Delta L = \frac{F \cdot L_0}{A \cdot E}$$</div>
                             </div>
                         </div>
                     </div>
@@ -338,7 +339,7 @@
         </section>
 
         <!-- ========================================== -->
-        <!-- TAB 3: GENERADOR DE PROBLEMAS PRÁCTICOS (CORREGIDO) -->
+        <!-- TAB 3: GENERADOR DE PROBLEMAS PRÁCTICOS -->
         <!-- ========================================== -->
         <section id="sec-problemas" class="tab-content hidden space-y-6">
             <div class="max-w-4xl mx-auto space-y-6">
@@ -370,7 +371,7 @@
                         </div>
                     </div>
 
-                    <!-- Enunciado del Problema (Renderizado corregido sin código bruto LaTeX) -->
+                    <!-- Enunciado del Problema -->
                     <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-5 text-slate-200 text-base leading-relaxed">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Enunciado del problema:</div>
                         <div id="problem-text-container" class="space-y-2">
@@ -409,15 +410,15 @@
                         <div class="font-bold flex items-center gap-2">
                             <i class="fa-solid fa-lightbulb"></i> Pista para resolver:
                         </div>
-                        <div id="hint-content" class="font-mono text-slate-300"></div>
+                        <div id="hint-content" class="text-slate-300"></div>
                     </div>
 
-                    <!-- Bloque de Solución Paso a Paso -->
+                    <!-- Bloque de Solución Paso a Paso (Formateado limpio) -->
                     <div id="solution-box" class="hidden p-5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs space-y-3">
                         <div class="font-bold text-cyan-400 text-sm border-b border-slate-800 pb-2 flex items-center gap-2">
                             <i class="fa-solid fa-square-root-variable"></i> Solución Detallada Paso a Paso:
                         </div>
-                        <div id="solution-content" class="space-y-2 font-mono leading-relaxed"></div>
+                        <div id="solution-content" class="space-y-3 leading-relaxed"></div>
                     </div>
 
                 </div>
@@ -452,49 +453,113 @@
         </section>
 
         <!-- ========================================== -->
-        <!-- TAB 5: CONVERSOR DE UNIDADES -->
+        <!-- TAB 5: CONVERSOR MULTIDIRECCIONAL DE UNIDADES -->
         <!-- ========================================== -->
         <section id="sec-conversor" class="tab-content hidden space-y-6">
             <div class="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
                 <div class="border-b border-slate-800 pb-4">
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-right-left text-cyan-400"></i> Conversor de Unidades de Ingeniería
+                        <i class="fa-solid fa-right-left text-cyan-400"></i> Conversor Dinámico de Unidades de Ingeniería
                     </h2>
-                    <p class="text-xs text-slate-400 mt-1">Herramienta rápida para conversión entre Pa, MPa, N/mm², bar, kN y m².</p>
+                    <p class="text-xs text-slate-400 mt-1">Herramienta interactiva para conversión multidireccional con equivalencias físicas exactas.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tensión y Presión -->
-                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                        <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Tensión / Presión</h3>
-                        <div class="space-y-2">
-                            <label class="text-xs text-slate-400 block">Valor de entrada:</label>
-                            <input type="number" id="conv-stress-val" value="100" oninput="convertUnits()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono">
-                            
-                            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2">
-                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">MPa:</span> <span id="c-mpa" class="text-cyan-300">100</span></div>
-                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">N/mm²:</span> <span id="c-nmm2" class="text-cyan-300">100</span></div>
-                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">Pa:</span> <span id="c-pa" class="text-slate-300">1e8</span></div>
-                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">bar:</span> <span id="c-bar" class="text-slate-300">1000</span></div>
+                    <!-- Conversión de Tensión y Presión -->
+                    <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-gauge-high"></i> Tensión / Presión
+                            </h3>
+                            <span class="text-[10px] text-slate-500 font-mono">1 MPa = 1 N/mm²</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[11px] text-slate-400 block mb-1">Valor de entrada:</label>
+                                <input type="number" id="conv-stress-val" value="100" step="any" oninput="convertUnits()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono focus:border-cyan-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[11px] text-slate-400 block mb-1">Unidad de origen:</label>
+                                <select id="conv-stress-unit" onchange="convertUnits()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-xs text-slate-100 font-mono focus:border-cyan-500 focus:outline-none">
+                                    <option value="MPa" selected>MPa (N/mm²)</option>
+                                    <option value="Pa">Pa (N/m²)</option>
+                                    <option value="kPa">kPa</option>
+                                    <option value="GPa">GPa</option>
+                                    <option value="bar">bar</option>
+                                    <option value="kp_cm2">kp/cm² (kgf/cm²)</option>
+                                    <option value="psi">psi (lb/in²)</option>
+                                    <option value="atm">atm (Atmósferas)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-slate-800">
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">MPa:</span> <span id="c-mpa" class="text-cyan-300 font-bold">100</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">N/mm²:</span> <span id="c-nmm2" class="text-cyan-300 font-bold">100</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">Pa (N/m²):</span> <span id="c-pa" class="text-slate-300">1.00e+8</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">GPa:</span> <span id="c-gpa" class="text-slate-300">0.100</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">bar:</span> <span id="c-bar" class="text-slate-300">1000.0</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">kp/cm²:</span> <span id="c-kpcm2" class="text-slate-300">1019.7</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">psi:</span> <span id="c-psi" class="text-slate-300">14503.8</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">atm:</span> <span id="c-atm" class="text-slate-300">986.9</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Conversión de Fuerza -->
+                    <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-weight-hanging"></i> Fuerza de Tracción
+                            </h3>
+                            <span class="text-[10px] text-slate-500 font-mono">1 kN = 1000 N</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[11px] text-slate-400 block mb-1">Valor de entrada:</label>
+                                <input type="number" id="conv-force-val" value="15" step="any" oninput="convertUnits()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono focus:border-cyan-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[11px] text-slate-400 block mb-1">Unidad de origen:</label>
+                                <select id="conv-force-unit" onchange="convertUnits()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-xs text-slate-100 font-mono focus:border-cyan-500 focus:outline-none">
+                                    <option value="kN" selected>kN (Kilonewton)</option>
+                                    <option value="N">N (Newton)</option>
+                                    <option value="MN">MN (Meganewton)</option>
+                                    <option value="kp">kp / kgf (Kilopondio)</option>
+                                    <option value="lbf">lbf (Libra fuerza)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-slate-800">
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">Newton (N):</span> <span id="c-n" class="text-amber-300 font-bold">15000</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">Kilonewton (kN):</span> <span id="c-kn" class="text-amber-300 font-bold">15.00</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">Meganewton (MN):</span> <span id="c-mn" class="text-slate-300">0.0150</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500 block text-[10px]">Kilopondio (kp):</span> <span id="c-kp" class="text-slate-300">1529.57</span></div>
+                            <div class="p-2 bg-slate-900 rounded border border-slate-800 col-span-2"><span class="text-slate-500 block text-[10px]">Libras Fuerza (lbf):</span> <span id="c-lbf" class="text-slate-300">3372.13</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Geometría Sección Circular -->
+                    <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4 md:col-span-2">
+                        <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-circle-dot"></i> Sección Circular ($d \rightarrow A = \frac{\pi \cdot d^2}{4}$)
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                            <div>
+                                <label class="text-xs text-slate-400 block mb-1">Diámetro $d$ (mm):</label>
+                                <input type="number" id="conv-diam-val" value="16" step="0.1" oninput="convertUnits()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono">
+                            </div>
+                            <div class="sm:col-span-2 grid grid-cols-3 gap-2 text-xs font-mono">
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800 text-center"><span class="text-slate-500 block text-[10px]">Área ($mm²$):</span> <span id="c-area-mm2" class="text-emerald-400 font-bold">201.06</span></div>
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800 text-center"><span class="text-slate-500 block text-[10px]">Área ($cm²$):</span> <span id="c-area-cm2" class="text-slate-300">2.011</span></div>
+                                <div class="p-2 bg-slate-900 rounded border border-slate-800 text-center"><span class="text-slate-500 block text-[10px]">Área ($m²$):</span> <span id="c-area-m2" class="text-slate-300">2.01e-4</span></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Fuerza -->
-                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                        <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Fuerza</h3>
-                        <div class="space-y-2">
-                            <label class="text-xs text-slate-400 block">Valor en kN:</label>
-                            <input type="number" id="conv-force-val" value="15" oninput="convertUnits()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono">
-                            
-                            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2">
-                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">N:</span> <span id="c-n" class="text-amber-300">15000</span></div>
-                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">kN:</span> <span id="c-kn" class="text-amber-300">15</span></div>
-                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">MN:</span> <span id="c-mn" class="text-slate-300">0.015</span></div>
-                                <div class="p-2 bg-slate-900 rounded border border-slate-800"><span class="text-slate-500">kp (kgf):</span> <span id="c-kp" class="text-slate-300">1529.5</span></div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>
@@ -508,7 +573,7 @@
         </div>
     </footer>
 
-    <!-- LOGICA JAVASCRIPT DE LA APLICACIÓN -->
+    <!-- LÓGICA JAVASCRIPT DE LA APLICACIÓN -->
     <script>
         // --- BASE DE DATOS DE MATERIALES ---
         const MATERIALS = {
@@ -523,13 +588,11 @@
         let autoPullInterval = null;
         let isAutoPulling = false;
         
-        // Estado del módulo de ejercicios
         let problemNumber = 1;
         let scoreHits = 0;
         let currentStreak = 0;
         let currentProblem = null;
 
-        // Estado del test teórico
         let currentQuizIndex = 0;
         const quizQuestions = [
             {
@@ -541,55 +604,55 @@
                     "El material se deforma permanentemente desde el inicio."
                 ],
                 answer: 1,
-                explanation: "La Ley de Hooke ($F = k \\cdot \\Delta L$ o $\\sigma = E \\cdot \\varepsilon$) establece que en el régimen elástico el alargamiento es directamente proporcional a la fuerza aplicada."
+                explanation: "La Ley de Hooke ($F = k \\cdot \\Delta L$ o $\\sigma = E \\cdot \\varepsilon$) establece que en el régimen elástico el alargamiento es directamente proporcional a la fuerza de tracción."
             },
             {
                 q: "¿Qué representa el Módulo de Young ($E$)?",
                 options: [
                     "La tenacidad total a la rotura del material.",
                     "La rigidez del material en su régimen elástico.",
-                    "La fuerza máxima que aguanta la sección.",
+                    "La fuerza máxima que soporta la sección circular.",
                     "La ductilidad o capacidad de formar hilos."
                 ],
                 answer: 1,
-                explanation: "El Módulo de Young ($E$) mide la rigidez de un material: a mayor valor de $E$, menor alargamiento sufrirá ante la misma tensión."
+                explanation: "El Módulo de Young ($E$) mide la rigidez de un material: a mayor valor de $E$, menor alargamiento sufrirá ante una misma tensión aplicada."
             },
             {
-                q: "Si superamos el límite elástico (punto de fluencia $\\sigma_y$), ¿qué le ocurre al material?",
+                q: "Si superamos el límite elástico (punto de fluencia $\\sigma_y$), ¿qué le ocurre a la probeta?",
                 options: [
-                    "Recupera totalmente su forma al retirar la carga.",
+                    "Recupera totalmente su forma original al retirar la carga.",
                     "Se rompe de manera instantánea y frágil.",
                     "Experimenta deformaciones plásticas permanentes.",
-                    "Su módulo de elasticidad se duplica."
+                    "Su módulo de elasticidad se duplica automáticamente."
                 ],
                 answer: 2,
-                explanation: "Al rebasar el límite elástico $\\sigma_y$, entramos en la zona plástica. El material ya no recuperará su longitud inicial $L_0$ completamente."
+                explanation: "Al rebasar el límite elástico $\\sigma_y$, la pieza entra en la zona plástica y no recuperará su longitud inicial $L_0$ completamente."
             },
             {
-                q: "¿Qué es el fenómeno de estricción (cuello) durante el ensayo de tracción?",
+                q: "¿En qué consiste el fenómeno de estricción durante el ensayo de tracción?",
                 options: [
-                    "El aumento repentino del diámetro del elemento.",
-                    "La disminución local concentrada de la sección transversal previa a la rotura.",
-                    "El endurecimiento por deformación en frío.",
-                    "La disminución de la longitud total."
+                    "Un aumento repentino del diámetro de la probeta.",
+                    "Una reducción localizada de la sección transversal circular antes de la rotura.",
+                    "Un aumento del Módulo de Elasticidad.",
+                    "Una reducción de la longitud total bajo tracción."
                 ],
                 answer: 1,
-                explanation: "La estricción es la reducción localizada de la sección transversal de la probeta tras alcanzar la tensión máxima de tracción."
+                explanation: "La estricción es la reducción concentrada de la sección transversal de la probeta circular tras superar la resistencia máxima a la tracción."
             },
             {
-                q: "¿Cuál es la unidad del Módulo de Young en el Sistema Internacional?",
+                q: "¿Cuál es la relación exacta entre Megapascales (MPa) y Newtons por milímetro cuadrado (N/mm²)?",
                 options: [
-                    "Newton (N)",
-                    "Pascal (Pa) o $N/m^2$",
-                    "Milímetro ($mm$)",
-                    "Adimensional (sin unidades)"
+                    "$1\\text{ MPa} = 1000\\text{ N/mm}^2$",
+                    "$1\\text{ MPa} = 1\\text{ N/mm}^2$",
+                    "$1\\text{ MPa} = 0,001\\text{ N/mm}^2$",
+                    "$1\\text{ MPa} = 10^6\\text{ N/mm}^2$"
                 ],
                 answer: 1,
-                explanation: "El Módulo de Young se mide en pascales (Pa) o sus derivados comunes en ingeniería como el megapascal (MPa) o gigapascal (GPa)."
+                explanation: "Puesto que $1\\text{ N/mm}^2 = 1\\text{ N} / (10^{-6}\\text{ m}^2) = 10^6\\text{ N/m}^2 = 10^6\\text{ Pa} = 1\\text{ MPa}$, la equivalencia es exactamente 1 a 1."
             }
         ];
 
-        // --- INICIALIZACIÓN DE LA APLICACIÓN ---
+        // --- INICIALIZACIÓN ---
         window.addEventListener('load', () => {
             updateSimulation();
             runCalculator();
@@ -597,7 +660,6 @@
             renderQuizQuestion();
             convertUnits();
             
-            // Re-renderizar KaTeX tras cargar librerías
             setTimeout(() => {
                 renderMathIn(document.body);
             }, 300);
@@ -616,7 +678,7 @@
                         ],
                         throwOnError: false
                     });
-                } catch(e) { console.log('KaTeX error', e); }
+                } catch(e) { console.log('KaTeX error:', e); }
             }
         }
 
@@ -638,7 +700,7 @@
             }
         }
 
-        // --- SIMULADOR 2D Y DIBUJO DE GRÁFICA ---
+        // --- SIMULADOR Y DIBUJO DE GRÁFICA ---
         function updateSimulation() {
             const matKey = document.getElementById('sim-material').value;
             const mat = MATERIALS[matKey];
@@ -653,19 +715,17 @@
             document.getElementById('val-F').innerText = `${F_kN.toFixed(1)} kN`;
             document.getElementById('mat-prop-badge').innerText = `E = ${mat.E} GPa | σ_y = ${mat.yield} MPa`;
 
-            // Cálculos físicos
+            // Sección circular
             const A_mm2 = (Math.PI * Math.pow(d, 2)) / 4;
             const A_m2 = A_mm2 * 1e-6;
             const F_N = F_kN * 1000;
-            const sigma_MPa = F_N / A_mm2; // MPa = N/mm2
+            const sigma_MPa = F_N / A_mm2; // 1 N/mm² = 1 MPa
             
-            // Deformación elástica y alargamiento
             const E_MPa = mat.E * 1000;
             let strain = sigma_MPa / E_MPa;
             let isYielded = sigma_MPa >= mat.yield;
             let isFractured = sigma_MPa >= mat.ultimate || strain >= mat.maxStrain;
 
-            // Ajuste no lineal si pasa del límite elástico
             if (isYielded && !isFractured) {
                 const plasticStrain = Math.pow((sigma_MPa - mat.yield) / (mat.ultimate - mat.yield + 1), 2) * 0.05;
                 strain += plasticStrain;
@@ -675,7 +735,7 @@
             const L_final_m = L0 + (deltaL_mm / 1000);
             const safetyFactor = mat.yield / (sigma_MPa || 0.001);
 
-            // Actualizar Métricas
+            // Métricas
             document.getElementById('m-area').innerHTML = `${A_mm2.toFixed(1)} <span class="text-xs text-slate-400 font-normal">mm²</span>`;
             document.getElementById('m-area-m2').innerText = `${A_m2.toExponential(2)} m²`;
             
@@ -705,10 +765,7 @@
                 sfLabel.className = "text-[10px] text-emerald-500 block";
             }
 
-            // Actualizar tarjeta de estado
             updateStatusCard(isYielded, isFractured, sigma_MPa, mat);
-
-            // Redibujar Canvas Probeta 2D y Gráfica
             drawSpecimenCanvas(strain, isYielded, isFractured, sigma_MPa / mat.yield);
             drawCurveCanvas(mat, strain, sigma_MPa, isFractured);
         }
@@ -723,26 +780,24 @@
                 card.className = "p-3 rounded-xl bg-rose-950/60 border border-rose-500/50 text-rose-300 flex items-center gap-3";
                 icon.className = "fa-solid fa-triangle-exclamation text-xl text-rose-400";
                 title.innerText = "¡ROTURA DEL MATERIAL!";
-                desc.innerText = "La tensión ha superado la resistencia máxima del material.";
+                desc.innerText = "Tensión superior a la resistencia máxima.";
             } else if (isYielded) {
                 card.className = "p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 text-amber-300 flex items-center gap-3";
                 icon.className = "fa-solid fa-triangle-exclamation text-xl text-amber-400";
                 title.innerText = "Zona Plástica (Fluencia / Estricción)";
-                desc.innerText = "El material sufre deformación permanente e irrecuperable.";
+                desc.innerText = "Deformación permanente irrecuperable.";
             } else {
                 card.className = "p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 flex items-center gap-3";
                 icon.className = "fa-solid fa-shield-halved text-xl text-emerald-400";
                 title.innerText = "Zona Elástica (Ley de Hooke)";
-                desc.innerText = "El material recuperar su forma inicial al retirar la fuerza.";
+                desc.innerText = "Recupera la forma original al retirar la fuerza.";
             }
         }
 
-        // Dibujo de la Probeta en 2D en Canvas
         function drawSpecimenCanvas(strain, isYielded, isFractured, stressRatio) {
             const canvas = document.getElementById('specimenCanvas');
             const ctx = canvas.getContext('2d');
             
-            // Ajustar resolución DPI
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width * dpr;
@@ -751,65 +806,46 @@
 
             const w = rect.width;
             const h = rect.height;
-
             ctx.clearRect(0, 0, w, h);
 
-            // Mordazas hidráulicas
             const gripW = 50;
             const gripH = h - 20;
             
             ctx.fillStyle = '#334155';
-            ctx.fillRect(10, 10, gripW, gripH); // Mordaza izquierda
-            ctx.fillRect(w - gripW - 10, 10, gripW, gripH); // Mordaza derecha
+            ctx.fillRect(10, 10, gripW, gripH);
+            ctx.fillRect(w - gripW - 10, 10, gripW, gripH);
 
-            // Textura mordazas
             ctx.fillStyle = '#475569';
             for(let i=15; i<gripH+10; i+=8) {
                 ctx.fillRect(12, i, gripW-4, 2);
                 ctx.fillRect(w - gripW - 8, i, gripW-4, 2);
             }
 
-            // Cuerpo de la probeta
             const startX = 10 + gripW;
             const endX_base = w - gripW - 10;
-            
-            // Extensión visual
             const visualStretch = Math.min(strain * 180, 70);
             const currentEndX = endX_base + (isFractured ? visualStretch * 0.5 : visualStretch);
             const totalLen = currentEndX - startX;
 
             const centerY = h / 2;
             const radius = 18;
-
-            // Indicador de Estricción (reducción del radio central)
             const necking = isYielded ? Math.min(stressRatio * 0.35, 0.5) : 0;
             document.getElementById('necking-indicator').innerText = `Estricción: ${(necking*100).toFixed(0)}%`;
 
-            // Color mapa de calor según tensión
             let gradient = ctx.createLinearGradient(startX, 0, currentEndX, 0);
             if (isFractured) {
-                gradient.addColorStop(0, '#ef4444');
-                gradient.addColorStop(1, '#ef4444');
+                gradient.addColorStop(0, '#ef4444'); gradient.addColorStop(1, '#ef4444');
             } else if (isYielded) {
-                gradient.addColorStop(0, '#f59e0b');
-                gradient.addColorStop(0.5, '#ef4444');
-                gradient.addColorStop(1, '#f59e0b');
+                gradient.addColorStop(0, '#f59e0b'); gradient.addColorStop(0.5, '#ef4444'); gradient.addColorStop(1, '#f59e0b');
             } else {
-                gradient.addColorStop(0, '#0284c7');
-                gradient.addColorStop(0.5, '#38bdf8');
-                gradient.addColorStop(1, '#0284c7');
+                gradient.addColorStop(0, '#0284c7'); gradient.addColorStop(0.5, '#38bdf8'); gradient.addColorStop(1, '#0284c7');
             }
 
             if (!isFractured) {
-                // Dibujar Probeta entera con cuello
                 ctx.beginPath();
                 ctx.moveTo(startX, centerY - radius);
-                
-                // Curva superior con estricción
                 ctx.quadraticCurveTo(startX + totalLen*0.5, centerY - radius*(1-necking), currentEndX, centerY - radius);
                 ctx.lineTo(currentEndX, centerY + radius);
-                
-                // Curva inferior con estricción
                 ctx.quadraticCurveTo(startX + totalLen*0.5, centerY + radius*(1-necking), startX, centerY + radius);
                 ctx.closePath();
 
@@ -818,20 +854,10 @@
                 ctx.strokeStyle = '#38bdf8';
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
-
-                // Marcas de galga (puntos de medición de longitud)
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(startX + totalLen*0.25, centerY, 3, 0, Math.PI*2);
-                ctx.arc(startX + totalLen*0.75, centerY, 3, 0, Math.PI*2);
-                ctx.fill();
-
             } else {
-                // Dibujar Probeta Rotada en 2 piezas
                 const gap = 20;
                 const midX = startX + totalLen*0.5;
 
-                // Pieza izquierda
                 ctx.beginPath();
                 ctx.moveTo(startX, centerY - radius);
                 ctx.lineTo(midX - gap/2, centerY - radius);
@@ -843,7 +869,6 @@
                 ctx.fillStyle = '#ef4444';
                 ctx.fill();
 
-                // Pieza derecha
                 ctx.beginPath();
                 ctx.moveTo(midX + gap/2, centerY - radius);
                 ctx.lineTo(currentEndX, centerY - radius);
@@ -857,7 +882,6 @@
             }
         }
 
-        // Dibujo del Diagrama Tensión - Deformación Unitaria en Canvas
         function drawCurveCanvas(mat, currentStrain, currentSigma, isFractured) {
             const canvas = document.getElementById('curveCanvas');
             const ctx = canvas.getContext('2d');
@@ -870,90 +894,60 @@
 
             const w = rect.width;
             const h = rect.height;
-
             ctx.clearRect(0, 0, w, h);
 
             const padL = 45, padR = 25, padB = 30, padT = 20;
             const plotW = w - padL - padR;
             const plotH = h - padB - padT;
 
-            // Escalas
             const maxSigma = mat.ultimate * 1.25;
             const maxEps = mat.maxStrain * 1.2;
 
             function toX(eps) { return padL + (eps / maxEps) * plotW; }
             function toY(sig) { return h - padB - (sig / maxSigma) * plotH; }
 
-            // Rejilla de fondo
             ctx.strokeStyle = '#1e293b';
             ctx.lineWidth = 1;
             for(let i=0; i<=4; i++) {
                 let y = padT + (plotH/4)*i;
                 ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
-                
                 let x = padL + (plotW/4)*i;
                 ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h - padB); ctx.stroke();
             }
 
-            // Ejes Cartesisanos
             ctx.strokeStyle = '#64748b';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
             ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB);
             ctx.stroke();
 
-            // Etiqueta de Ejes
             ctx.fillStyle = '#94a3b8';
             ctx.font = '10px sans-serif';
             ctx.fillText('Tensión σ (MPa)', padL - 10, padT - 8);
             ctx.fillText('Deformación ε', w - padR - 60, h - 8);
 
-            // Puntos clave de la curva del material
             const epsYield = mat.yield / (mat.E * 1000);
             const epsUlt = mat.maxStrain * 0.7;
             const epsFract = mat.maxStrain;
 
-            // Trazado de la Curva Característica
             ctx.beginPath();
             ctx.moveTo(toX(0), toY(0));
-            // Tramo Elástico
             ctx.lineTo(toX(epsYield), toY(mat.yield));
-            // Tramo Plástico hasta resistencia máxima
             ctx.quadraticCurveTo(toX((epsYield + epsUlt)/2), toY(mat.ultimate), toX(epsUlt), toY(mat.ultimate));
-            // Estricción hasta rotura
             ctx.lineTo(toX(epsFract), toY(mat.ultimate * 0.8));
             
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 2.5;
             ctx.stroke();
 
-            // Sombra bajo la curva elástica
-            ctx.beginPath();
-            ctx.moveTo(toX(0), toY(0));
-            ctx.lineTo(toX(epsYield), toY(mat.yield));
-            ctx.lineTo(toX(epsYield), h - padB);
-            ctx.lineTo(toX(0), h - padB);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
-            ctx.fill();
-
-            // Punto de Fluencia (Límite Elástico)
-            ctx.fillStyle = '#f59e0b';
-            ctx.beginPath();
-            ctx.arc(toX(epsYield), toY(mat.yield), 4, 0, Math.PI*2);
-            ctx.fill();
-
-            // Cursor Animado del Estado Actual
             const curX = toX(currentStrain);
             const curY = toY(currentSigma);
 
-            // Proyecciones punteadas
             ctx.setLineDash([3, 3]);
             ctx.strokeStyle = '#f59e0b';
             ctx.beginPath(); ctx.moveTo(curX, h - padB); ctx.lineTo(curX, curY); ctx.lineTo(padL, curY); ctx.stroke();
             ctx.setLineDash([]);
 
-            // Punto interactivo
             ctx.fillStyle = isFractured ? '#ef4444' : '#38bdf8';
             ctx.beginPath();
             ctx.arc(curX, curY, 6, 0, Math.PI*2);
@@ -963,7 +957,6 @@
             ctx.stroke();
         }
 
-        // Controles Animación Automática (Ejecutar Ensayo)
         function toggleAutoPull() {
             const btn = document.getElementById('btn-auto-pull');
             const icon = document.getElementById('icon-auto-pull');
@@ -1006,7 +999,7 @@
             updateSimulation();
         }
 
-        // --- CALCULADORA RÁPIDA ---
+        // --- CALCULADORA ---
         function runCalculator() {
             const F = parseFloat(document.getElementById('calc-f').value) || 0;
             const E = parseFloat(document.getElementById('calc-e').value) || 1;
@@ -1024,19 +1017,17 @@
             document.getElementById('calc-res-dl').innerText = `${deltaL.toFixed(3)} mm`;
         }
 
-        // --- MÓDULO DE GENERACIÓN DE PROBLEMAS (CORREGIDO) ---
+        // --- GENERADOR DE PROBLEMAS (FORMATO LIMPIO Y SECCIONES CIRCULARES) ---
         function generateNewProblem() {
             const matKeys = Object.keys(MATERIALS);
             const matKey = matKeys[Math.floor(Math.random() * matKeys.length)];
             const mat = MATERIALS[matKey];
 
-            // Parámetros aleatorios físicamente válidos
             const L0 = parseFloat((1.5 + Math.random() * 3.5).toFixed(1)); // 1.5 a 5.0 m
             const d = Math.floor(10 + Math.random() * 18); // 10 a 28 mm
             const A_mm2 = (Math.PI * d * d) / 4;
             
-            // Elegir fuerza que permanezca en régimen elástico (<= 85% de fluencia)
-            const maxF_kN = (mat.yield * 0.85 * A_mm2) / 1000;
+            const maxF_kN = (mat.yield * 0.80 * A_mm2) / 1000;
             const F_kN = parseFloat((2 + Math.random() * (maxF_kN - 2)).toFixed(1));
 
             const deltaL_mm = (F_kN * 1000 * L0) / (A_mm2 * mat.E);
@@ -1044,17 +1035,25 @@
 
             const problemTypes = [
                 {
-                    cat: "CÁLCULO DE ALARGAMIENTO (LEY DE HOOKE)",
+                    cat: "CÁLCULO DE ALARGAMIENTO",
                     title: `Ejercicio Práctico #${problemNumber}`,
                     unit: "mm",
                     val: deltaL_mm,
-                    text: `Una varilla de <strong class="text-cyan-300">${mat.name}</strong> ($E = ${mat.E}\\text{ GPa}$) tiene una longitud inicial $L_0 = ${L0}\\text{ m}$ y un diámetro $d = ${d}\\text{ mm}$. Si se aplica una carga de tracción $F = ${F_kN}\\text{ kN}$ en su rango elástico, halla el alargamiento total $\\Delta L$ en $\\text{mm}$.`,
-                    hint: `A = \\frac{\\pi \\cdot d^2}{4} = ${A_mm2.toFixed(2)}\\text{ mm}^2. \\quad \\Delta L = \\frac{F \\cdot L_0}{A \\cdot E}`,
+                    text: `Una probeta cilíndrica de <strong>${mat.name}</strong> ($E = ${mat.E}\\text{ GPa}$) tiene una sección circular de diámetro $d = ${d}\\text{ mm}$ y una longitud inicial $L_0 = ${L0}\\text{ m}$. Si se somete a una carga de tracción $F = ${F_kN}\\text{ kN}$ en su rango elástico, calcula el alargamiento total $\\Delta L$ en $\\text{mm}$.`,
+                    hint: `1. Área circular: $A = \\frac{\\pi \\cdot d^2}{4}$<br>2. Alargamiento: $\\Delta L = \\frac{F \\cdot L_0}{A \\cdot E}$`,
                     steps: [
-                        `1. \\text{Área de la sección transversal: } A = \\frac{\\pi \\cdot ${d}^2}{4} = ${A_mm2.toFixed(2)}\\text{ mm}^2`,
-                        `2. \\text{Fuerza en Newtons: } F = ${F_kN}\\text{ kN} = ${(F_kN*1000).toFixed(0)}\\text{ N}`,
-                        `3. \\text{Sustitución en Ley de Hooke: } \\Delta L = \\frac{${(F_kN*1000).toFixed(0)} \\cdot ${L0}}{${A_mm2.toFixed(2)} \\cdot ${(mat.E * 1000).toFixed(0)}} \\text{ m}`,
-                        `4. \\text{Resultado en mm: } \\Delta L = ${deltaL_mm.toFixed(3)}\\text{ mm}`
+                        `<strong>Paso 1: Área de la sección circular ($A$)</strong><br>
+                        $$A = \\frac{\\pi \\cdot d^2}{4} = \\frac{\\pi \\cdot (${d}\\text{ mm})^2}{4} = ${A_mm2.toFixed(2)}\\text{ mm}^2$$`,
+                        
+                        `<strong>Paso 2: Conversión de fuerza y módulo de Young</strong><br>
+                        Fuerza $F = ${F_kN}\\text{ kN} = ${(F_kN*1000).toFixed(0)}\\text{ N}$<br>
+                        Módulo de elasticidad $E = ${mat.E}\\text{ GPa} = ${(mat.E*1000).toFixed(0)}\\text{ MPa (N/mm}^2)$`,
+                        
+                        `<strong>Paso 3: Aplicación de la Ley de Hooke ($\\Delta L$)</strong><br>
+                        $$\\Delta L = \\frac{F \\cdot L_0}{A \\cdot E} = \\frac{${(F_kN*1000).toFixed(0)}\\text{ N} \\cdot ${L0}\\text{ m}}{${A_mm2.toFixed(2)}\\text{ mm}^2 \\cdot ${(mat.E*1000).toFixed(0)}\\text{ N/mm}^2} \\cdot 1000\\text{ mm/m}$$`,
+                        
+                        `<strong>Paso 4: Resultado final</strong><br>
+                        $$\\Delta L = ${deltaL_mm.toFixed(3)}\\text{ mm}$$`
                     ]
                 },
                 {
@@ -1062,32 +1061,54 @@
                     title: `Ejercicio Práctico #${problemNumber}`,
                     unit: "kN",
                     val: F_kN,
-                    text: `¿Qué fuerza de tracción $F$ en $\\text{kN}$ se debe aplicar a un elemento de <strong class="text-cyan-300">${mat.name}</strong> ($E = ${mat.E}\\text{ GPa}$) de longitud $L_0 = ${L0}\\text{ m}$ y diámetro $d = ${d}\\text{ mm}$ para producir un alargamiento $\\Delta L = ${deltaL_mm.toFixed(3)}\\text{ mm}$?`,
-                    hint: `F = \\frac{\\Delta L \\cdot A \\cdot E}{L_0}`,
+                    text: `¿Qué fuerza de tracción $F$ en $\\text{kN}$ se debe aplicar a una barra de sección circular de <strong>${mat.name}</strong> ($E = ${mat.E}\\text{ GPa}$), de diámetro $d = ${d}\\text{ mm}$ y longitud $L_0 = ${L0}\\text{ m}$, para producir un alargamiento de $\\Delta L = ${deltaL_mm.toFixed(3)}\\text{ mm}$?`,
+                    hint: `Despeja la fuerza $F$ de la fórmula del alargamiento: $F = \\frac{\\Delta L \\cdot A \\cdot E}{L_0}$`,
                     steps: [
-                        `1. \\text{Área de la sección: } A = ${A_mm2.toFixed(2)}\\text{ mm}^2`,
-                        `2. \\text{Despejar fuerza: } F = \\frac{\\Delta L \\cdot A \\cdot E}{L_0}`,
-                        `3. \\text{Sustitución: } F = \\frac{${deltaL_mm.toFixed(3)} \\cdot ${A_mm2.toFixed(2)} \\cdot ${(mat.E * 1000).toFixed(0)}}{${(L0 * 1000).toFixed(0)}} = ${(F_kN*1000).toFixed(0)}\\text{ N}`,
-                        `4. \\text{Resultado en kN: } F = ${F_kN.toFixed(1)}\\text{ kN}`
+                        `<strong>Paso 1: Cálculo del área circular ($A$)</strong><br>
+                        $$A = \\frac{\\pi \\cdot d^2}{4} = \\frac{\\pi \\cdot (${d}\\text{ mm})^2}{4} = ${A_mm2.toFixed(2)}\\text{ mm}^2$$`,
+                        
+                        `<strong>Paso 2: Despejar la fuerza $F$</strong><br>
+                        $$F = \\frac{\\Delta L \\cdot A \\cdot E}{L_0}$$`,
+                        
+                        `<strong>Paso 3: Sustitución de valores numéricos</strong><br>
+                        $$F = \\frac{${deltaL_mm.toFixed(3)}\\text{ mm} \\cdot ${A_mm2.toFixed(2)}\\text{ mm}^2 \\cdot ${(mat.E*1000).toFixed(0)}\\text{ N/mm}^2}{${(L0*1000).toFixed(0)}\\text{ mm}} = ${(F_kN*1000).toFixed(0)}\\text{ N}$$`,
+                        
+                        `<strong>Paso 4: Conversión a kN</strong><br>
+                        $$F = \\frac{${(F_kN*1000).toFixed(0)}}{1000} = ${F_kN.toFixed(1)}\\text{ kN}$$`
+                    ]
+                },
+                {
+                    cat: "CÁLCULO DE DIÁMETRO MÍNIMO",
+                    title: `Ejercicio Práctico #${problemNumber}`,
+                    unit: "mm",
+                    val: d,
+                    text: `Se requiere diseñar un tirante cilíndrico de <strong>${mat.name}</strong> ($E = ${mat.E}\\text{ GPa}$) de longitud $L_0 = ${L0}\\text{ m}$ que soporte una carga $F = ${F_kN}\\text{ kN}$ con un alargamiento máximo permitido $\\Delta L = ${deltaL_mm.toFixed(3)}\\text{ mm}$. Calcula el diámetro mínimo $d$ en $\\text{mm}$ que debe tener su sección circular.`,
+                    hint: `1. Despeja el área $A = \\frac{F \\cdot L_0}{\\Delta L \\cdot E}$<br>2. Halla el diámetro $d = \\sqrt{\\frac{4 \\cdot A}{\\pi}}$`,
+                    steps: [
+                        `<strong>Paso 1: Despejar el área de la sección ($A$)</strong><br>
+                        $$A = \\frac{F \\cdot L_0}{\\Delta L \\cdot E} = \\frac{${(F_kN*1000).toFixed(0)}\\text{ N} \\cdot ${(L0*1000).toFixed(0)}\\text{ mm}}{${deltaL_mm.toFixed(3)}\\text{ mm} \\cdot ${(mat.E*1000).toFixed(0)}\\text{ N/mm}^2} = ${A_mm2.toFixed(2)}\\text{ mm}^2$$`,
+                        
+                        `<strong>Paso 2: Relacionar el área con el diámetro circular</strong><br>
+                        $$A = \\frac{\\pi \\cdot d^2}{4} \\implies d = \\sqrt{\\frac{4 \\cdot A}{\\pi}}$$`,
+                        
+                        `<strong>Paso 3: Calcular el diámetro $d$</strong><br>
+                        $$d = \\sqrt{\\frac{4 \\cdot ${A_mm2.toFixed(2)}}{\\pi}} = ${d.toFixed(1)}\\text{ mm}$$`
                     ]
                 }
             ];
 
             currentProblem = problemTypes[Math.floor(Math.random() * problemTypes.length)];
 
-            // Actualizar Interfaz
             document.getElementById('problem-category-badge').innerText = currentProblem.cat;
-            document.getElementById('problem-title').innerText = `Ejercicio Práctico #${problemNumber}`;
+            document.getElementById('problem-title').innerText = currentProblem.title;
             document.getElementById('problem-text-container').innerHTML = currentProblem.text;
             document.getElementById('unit-badge').innerText = currentProblem.unit;
             document.getElementById('user-answer').placeholder = `Ej: ${currentProblem.val.toFixed(2)}`;
 
-            // Ocultar paneles auxiliares
             document.getElementById('problem-feedback').className = 'hidden';
             document.getElementById('hint-box').className = 'hidden';
             document.getElementById('solution-box').className = 'hidden';
 
-            // Renderizado de matemáticas
             setTimeout(() => {
                 renderMathIn(document.getElementById('problem-text-container'));
             }, 50);
@@ -1110,7 +1131,7 @@
             const targetVal = currentProblem.val;
             const diffPct = Math.abs((userVal - targetVal) / targetVal) * 100;
 
-            if (diffPct <= 3.5) { // Tolerancia aceptable 3.5%
+            if (diffPct <= 3.5) {
                 scoreHits++;
                 currentStreak++;
                 document.getElementById('score-hits').innerText = scoreHits;
@@ -1123,10 +1144,7 @@
                     </div>
                     <div>Valor exacto: <strong>${targetVal.toFixed(3)} ${currentProblem.unit}</strong> (Margen de error: ${diffPct.toFixed(2)}%)</div>
                 `;
-                
-                // Mostrar Solución
                 showSolution();
-
             } else {
                 currentStreak = 0;
                 document.getElementById('score-streak').innerText = `0 🔥`;
@@ -1136,9 +1154,8 @@
                     <div class="font-bold flex items-center gap-2 text-sm">
                         <i class="fa-solid fa-circle-xmark text-rose-400"></i> Respuesta Incorrecta
                     </div>
-                    <div>Tu valor: <strong>${userVal} ${currentProblem.unit}</strong> | Valor esperado: <strong>${targetVal.toFixed(3)} ${currentProblem.unit}</strong>. Revisa las unidades y los cálculos.</div>
+                    <div>Tu valor: <strong>${userVal} ${currentProblem.unit}</strong> | Valor esperado: <strong>${targetVal.toFixed(3)} ${currentProblem.unit}</strong>. Revisa los cálculos.</div>
                 `;
-                
                 showSolution();
             }
 
@@ -1166,7 +1183,7 @@
         function showSolution() {
             const solBox = document.getElementById('solution-box');
             const solContent = document.getElementById('solution-content');
-            solContent.innerHTML = currentProblem.steps.map(s => `<div class="p-1 border-b border-slate-900">${s}</div>`).join('');
+            solContent.innerHTML = currentProblem.steps.map(s => `<div class="p-3 bg-slate-900 rounded-lg border border-slate-800/80">${s}</div>`).join('');
             solBox.classList.remove('hidden');
             renderMathIn(solContent);
         }
@@ -1223,21 +1240,61 @@
             if (currentQuizIndex < quizQuestions.length - 1) { currentQuizIndex++; renderQuizQuestion(); }
         }
 
-        // --- CONVERSOR DE UNIDADES ---
+        // --- CONVERSOR MULTIDIRECCIONAL DE UNIDADES ---
         function convertUnits() {
-            // Tensión
+            // Tensión / Presión
             const sVal = parseFloat(document.getElementById('conv-stress-val').value) || 0;
-            document.getElementById('c-mpa').innerText = sVal.toFixed(2);
-            document.getElementById('c-nmm2').innerText = sVal.toFixed(2);
-            document.getElementById('c-pa').innerText = (sVal * 1e6).toExponential(2);
-            document.getElementById('c-bar').innerText = (sVal * 10).toFixed(1);
+            const sUnit = document.getElementById('conv-stress-unit').value;
+
+            // Convertir a Pa como unidad base
+            let sPa = 0;
+            switch(sUnit) {
+                case 'MPa': sPa = sVal * 1e6; break;
+                case 'Pa': sPa = sVal; break;
+                case 'kPa': sPa = sVal * 1e3; break;
+                case 'GPa': sPa = sVal * 1e9; break;
+                case 'bar': sPa = sVal * 1e5; break;
+                case 'kp_cm2': sPa = sVal * 98066.5; break;
+                case 'psi': sPa = sVal * 6894.76; break;
+                case 'atm': sPa = sVal * 101325; break;
+            }
+
+            const sMPa = sPa / 1e6;
+            document.getElementById('c-mpa').innerText = sMPa.toFixed(3);
+            document.getElementById('c-nmm2').innerText = sMPa.toFixed(3);
+            document.getElementById('c-pa').innerText = sPa.toExponential(2);
+            document.getElementById('c-gpa').innerText = (sPa / 1e9).toFixed(4);
+            document.getElementById('c-bar').innerText = (sPa / 1e5).toFixed(2);
+            document.getElementById('c-kpcm2').innerText = (sPa / 98066.5).toFixed(2);
+            document.getElementById('c-psi').innerText = (sPa / 6894.76).toFixed(1);
+            document.getElementById('c-atm').innerText = (sPa / 101325).toFixed(2);
 
             // Fuerza
             const fVal = parseFloat(document.getElementById('conv-force-val').value) || 0;
-            document.getElementById('c-kn').innerText = fVal.toFixed(2);
-            document.getElementById('c-n').innerText = (fVal * 1000).toFixed(0);
-            document.getElementById('c-mn').innerText = (fVal / 1000).toFixed(4);
-            document.getElementById('c-kp').innerText = (fVal * 101.97).toFixed(1);
+            const fUnit = document.getElementById('conv-force-unit').value;
+
+            // Convertir a Newtons (N) como unidad base
+            let fN = 0;
+            switch(fUnit) {
+                case 'kN': fN = fVal * 1000; break;
+                case 'N': fN = fVal; break;
+                case 'MN': fN = fVal * 1e6; break;
+                case 'kp': fN = fVal * 9.80665; break;
+                case 'lbf': fN = fVal * 4.44822; break;
+            }
+
+            document.getElementById('c-n').innerText = fN.toFixed(1);
+            document.getElementById('c-kn').innerText = (fN / 1000).toFixed(3);
+            document.getElementById('c-mn').innerText = (fN / 1e6).toFixed(5);
+            document.getElementById('c-kp').innerText = (fN / 9.80665).toFixed(2);
+            document.getElementById('c-lbf').innerText = (fN / 4.44822).toFixed(2);
+
+            // Geometría Sección Circular
+            const dVal = parseFloat(document.getElementById('conv-diam-val').value) || 0;
+            const areaMM2 = (Math.PI * dVal * dVal) / 4;
+            document.getElementById('c-area-mm2').innerText = areaMM2.toFixed(2);
+            document.getElementById('c-area-cm2').innerText = (areaMM2 / 100).toFixed(3);
+            document.getElementById('c-area-m2').innerText = (areaMM2 * 1e-6).toExponential(2);
         }
     </script>
 </body>
